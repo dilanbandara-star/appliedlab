@@ -3,300 +3,639 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>සරල අනුවර්තී චලිතය (SHM) 3D AI Laboratory | ප්‍රසාද් මධුසංඛ</title>
+    <title>සරල අනුවර්තී චලිතය (SHM) 3D Laboratory | ප්‍රසාද් මධුසංඛ - හිතට වදින මැත්ස්</title>
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { cyber: '#00f2fe', neonPink: '#ff007f', neonGold: '#eab308', neonLime: '#10b981', spaceDark: '#070a12' },
-                    fontFamily: { sinhala: ['"Noto Sans Sinhala"', 'system-ui', 'sans-serif'], tech: ['"Orbitron"', 'monospace'] }
+                    colors: {
+                        cyber: '#00f2fe',
+                        neonPink: '#ff007f',
+                        neonGold: '#eab308',
+                        neonLime: '#10b981',
+                        neonViolet: '#a855f7',
+                        spaceDark: '#070a12',
+                        cardBg: 'rgba(11, 16, 30, 0.95)'
+                    },
+                    fontFamily: {
+                        sinhala: ['"Noto Sans Sinhala"', 'system-ui', 'sans-serif'],
+                        tech: ['"Orbitron"', 'monospace']
+                    }
                 }
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;600;700;800&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Three.js & OrbitControls via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <style>
-        * { user-select: none; -webkit-user-select: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #070a12; touch-action: none; }
-        .glass-panel { background: rgba(11, 17, 32, 0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(0, 242, 254, 0.22); box-shadow: 0 16px 40px -10px rgba(0,0,0,0.9); }
-        .interactive { pointer-events: auto !important; }
-        #headerContainer { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
-        #headerContainer.header-hidden { transform: translateY(calc(-100% - 16px)); }
-        input[type="range"] { -webkit-appearance: none; height: 5px; background: #1e293b; border-radius: 4px; outline: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 17px; height: 17px; border-radius: 50%; background: #00f2fe; cursor: pointer; box-shadow: 0 0 10px #00f2fe; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .responsive-drawer::-webkit-scrollbar { width: 4px; }
-        .responsive-drawer::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-        .responsive-drawer::-webkit-scrollbar-thumb { background: #00f2fe; border-radius: 8px; }
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
 
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #070a12;
+            touch-action: none;
+        }
+
+        /* Desktop Glassmorphism */
+        .glass-panel {
+            background: rgba(11, 17, 32, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 242, 254, 0.22);
+            box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(0, 242, 254, 0.03);
+        }
+
+        .interactive {
+            pointer-events: auto !important;
+        }
+
+        /* Header Animation */
+        #headerContainer {
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease;
+            will-change: transform;
+        }
+        #headerContainer.header-hidden {
+            transform: translateY(calc(-100% - 16px));
+        }
+
+        /* Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00f2fe;
+            cursor: pointer;
+            box-shadow: 0 0 12px #00f2fe;
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.25);
+            background: #ffffff;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Laptop Custom Slim Neon Scrollbar */
+        .responsive-drawer::-webkit-scrollbar {
+            width: 4.5px;
+        }
+        .responsive-drawer::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+        }
+        .responsive-drawer::-webkit-scrollbar-thumb {
+            background: #00f2fe;
+            border-radius: 8px;
+        }
+
+        /* Mobile Optimization */
         @media (max-width: 850px) {
-            .glass-panel, #compareModal, #theoryModal, #aiCopilotModal, #mobileBackdrop { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-            .responsive-drawer {
-                position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important; top: auto !important;
-                width: 100% !important; max-height: 82vh !important; border-radius: 28px 28px 0 0 !important;
-                border-top: 1.5px solid rgba(0, 242, 254, 0.5) !important; transform: translateY(105%) !important;
-                transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important; z-index: 60 !important;
-                box-shadow: 0 -15px 50px rgba(0,0,0,0.98) !important; display: flex !important; background: rgba(9, 13, 25, 0.98) !important;
+            .glass-panel, #compareModal, #theoryModal, #mobileBackdrop {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
             }
-            .responsive-drawer.drawer-open { transform: translateY(0) !important; }
+            .responsive-drawer {
+                position: fixed !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                top: auto !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: 82vh !important;
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+                border-top-left-radius: 28px !important;
+                border-top-right-radius: 28px !important;
+                border-bottom: none !important;
+                border-top: 1.5px solid rgba(0, 242, 254, 0.5) !important;
+                transform: translateY(105%) !important;
+                transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                z-index: 60 !important;
+                box-shadow: 0 -15px 50px rgba(0, 0, 0, 0.98) !important;
+                display: flex !important;
+                background: rgba(9, 13, 25, 0.98) !important;
+            }
+            .responsive-drawer.drawer-open {
+                transform: translateY(0) !important;
+            }
             .mobile-hide { display: none !important; }
             .mobile-drawer-header { display: flex !important; }
         }
+
         @media (min-width: 851px) {
             .mobile-bottom-dock, .mobile-drawer-header, .mobile-backdrop { display: none !important; }
             .responsive-drawer { transform: none !important; }
         }
-        .drag-pill { width: 38px; height: 4px; background: rgba(148, 163, 184, 0.45); border-radius: 999px; margin: 0 auto 6px auto; }
+
+        .drag-pill {
+            width: 42px;
+            height: 4.5px;
+            background: rgba(148, 163, 184, 0.45);
+            border-radius: 999px;
+            margin: 0 auto 6px auto;
+            transition: background-color 0.2s ease;
+        }
+        .drag-pill:active { background: #00f2fe; }
     </style>
 </head>
 <body class="bg-spaceDark text-slate-100 font-sinhala h-screen w-screen overflow-hidden relative">
 
+    <!-- 3D WebGL Canvas Layer -->
     <div id="canvas-container" class="absolute inset-0 z-0"></div>
-    <div id="mobileBackdrop" class="fixed inset-0 bg-black/75 z-30 hidden opacity-0 transition-opacity duration-300"></div>
 
+    <!-- Mobile Backdrop Dimmer (No Blur, Behind Drawers at z-30) -->
+    <div id="mobileBackdrop" class="fixed inset-0 bg-black/75 z-30 hidden opacity-0 transition-opacity duration-300 mobile-backdrop"></div>
+
+    <!-- UI Overlay Root (z-40) -->
     <div id="uiOverlayRoot" class="absolute inset-0 z-40 pointer-events-none flex flex-col justify-between p-2 md:p-3 overflow-hidden">
         
-        <!-- HEADER -->
+        <!-- AUTO-HIDING TOP HEADER -->
         <div id="headerContainer" class="w-full relative pointer-events-none z-20">
-            <header class="w-full flex flex-col lg:flex-row items-center justify-between gap-1.5 p-2 md:p-2.5 md:px-4 rounded-2xl glass-panel interactive shadow-2xl">
+            <header id="mainHeader" class="w-full flex flex-col lg:flex-row items-center justify-between gap-1.5 p-2 md:p-2.5 md:px-4 rounded-2xl glass-panel interactive shadow-2xl">
+                
+                <!-- Branding -->
                 <div class="flex items-center justify-between w-full lg:w-auto">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-neonPink flex items-center justify-center font-tech font-black text-white text-sm shadow-md">PM</div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-neonPink flex items-center justify-center font-tech font-black text-white text-sm md:text-base shadow-lg shadow-cyan-500/30 ring-1 ring-white/30">
+                            PM
+                        </div>
                         <div>
-                            <div class="flex items-center gap-1.5">
-                                <h1 class="text-xs md:text-sm font-extrabold bg-gradient-to-r from-white via-cyan-100 to-cyber bg-clip-text text-transparent">ප්‍රසාද් මධුසංඛ</h1>
-                                <span class="text-[9px] font-tech font-black px-1.5 py-0.2 rounded-full bg-gradient-to-r from-neonPink to-purple-600 text-white">A/L 3D Lab</span>
+                            <div class="flex items-center gap-1.5 md:gap-2">
+                                <h1 class="text-xs md:text-sm font-extrabold bg-gradient-to-r from-white via-cyan-100 to-cyber bg-clip-text text-transparent">
+                                    ප්‍රසාද් මධුසංඛ
+                                </h1>
+                                <span class="text-[9px] md:text-[10px] font-tech font-black px-2 py-0.5 rounded-full bg-gradient-to-r from-neonPink to-purple-600 text-white tracking-wider shadow-sm shadow-pink-500/40">
+                                    හිතට වදින මැත්ස්
+                                </span>
                             </div>
-                            <p class="text-[8.5px] text-slate-400">සරල අනුවර්තී චලිතය AI Interactive Laboratory</p>
+                            <p class="text-[8.5px] md:text-[9.5px] text-slate-400 font-medium">A/L Combined Mathematics | සරල අනුවර්තී චලිතය 3D Lab</p>
                         </div>
                     </div>
+
+                    <!-- Mobile Header Shortcuts -->
                     <div class="flex items-center gap-1 lg:hidden">
-                        <button id="btnAiCopilotMobile" class="px-2 py-1 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-[10px] font-bold active:scale-95">🤖 AI</button>
-                        <button id="btnTheoryMobile" class="px-2 py-1 rounded-xl bg-pink-950/60 text-pink-300 border border-pink-500/40 text-[10px] font-bold active:scale-95">📚 න්‍යාය</button>
+                        <button id="btnPinHeaderMobile" class="p-1.5 rounded-xl bg-slate-800/90 text-slate-300 border border-slate-700 text-xs flex items-center justify-center active:scale-95 transition">
+                            📌
+                        </button>
+                        <button id="btnTheoryMobile" class="px-2 py-1 rounded-xl bg-pink-950/60 text-pink-300 border border-pink-500/40 text-[10.5px] font-bold active:scale-95 transition">
+                            📚 න්‍යාය
+                        </button>
                     </div>
                 </div>
 
+                <!-- 5 Core Modes Carousel -->
                 <div class="w-full lg:w-auto overflow-x-auto no-scrollbar py-0.5">
-                    <div class="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-xl border border-slate-800 w-max mx-auto" id="modeSelector">
-                        <button data-mode="1" class="mode-btn px-2 py-1 rounded-lg text-xs font-bold bg-cyber text-spaceDark whitespace-nowrap">1. තිරස් තලය</button>
-                        <button data-mode="2" class="mode-btn px-2 py-1 rounded-lg text-xs font-semibold text-slate-300 whitespace-nowrap">2. සිරස් තන්තුව</button>
-                        <button data-mode="3" class="mode-btn px-2 py-1 rounded-lg text-xs font-semibold text-slate-300 whitespace-nowrap">3. ආනත තලය</button>
-                        <button data-mode="4" class="mode-btn px-2 py-1 rounded-lg text-xs font-semibold text-slate-300 whitespace-nowrap">4. දෙකෙළවර තන්තු</button>
-                        <button data-mode="5" class="mode-btn px-2 py-1 rounded-lg text-xs font-semibold text-slate-300 whitespace-nowrap">5. සරල ලෝලකය</button>
+                    <div class="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 w-max mx-auto" id="modeSelector">
+                        <button data-mode="1" class="mode-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-cyber text-spaceDark shadow-md shadow-cyan-500/30 whitespace-nowrap">
+                            1. තිරස් තලය
+                        </button>
+                        <button data-mode="2" class="mode-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800/80 whitespace-nowrap">
+                            2. සිරස් තන්තුව (Slack)
+                        </button>
+                        <button data-mode="3" class="mode-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800/80 whitespace-nowrap">
+                            3. ආනත තලය
+                        </button>
+                        <button data-mode="4" class="mode-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800/80 whitespace-nowrap">
+                            4. දෙකෙළවර තන්තු
+                        </button>
+                        <button data-mode="5" class="mode-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800/80 whitespace-nowrap">
+                            5. සරල ලෝලකය
+                        </button>
                     </div>
                 </div>
 
+                <!-- Desktop Top Right Buttons -->
                 <div class="hidden lg:flex items-center gap-1.5">
-                    <button id="btnOpenAiCopilot" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 text-white font-bold text-xs shadow-md border border-cyan-400/40">🤖 AI සහායක</button>
-                    <button id="btnPinHeader" class="px-2 py-1.5 rounded-xl bg-slate-800/90 hover:bg-cyan-500 hover:text-spaceDark border border-slate-700 text-xs font-semibold text-slate-300">📌 <span id="pinLabel">Pin</span></button>
-                    <button id="btnOpenCompare" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs">📊 Runs <span id="badgeCompareCount" class="font-tech text-cyan-300">0/5</span></button>
-                    <button id="btnTheory" class="px-2 py-1.5 rounded-xl bg-slate-800/90 text-pink-300 border border-pink-500/40 text-xs font-semibold">📚 න්‍යාය</button>
-                    <button id="btnResetView" class="p-1.5 px-2 rounded-xl bg-slate-800/90 text-slate-300 text-xs">🔄</button>
+                    <button id="btnPinHeader" title="Header එක ස්ථාවර කරන්න" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-cyan-500 hover:text-spaceDark border border-slate-700 text-xs font-semibold text-slate-300 transition shadow-md">
+                        <span id="pinIcon">📌</span> <span id="pinLabel" class="text-[10.5px]">Pin</span>
+                    </button>
+                    <button id="btnOpenCompare" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 border border-purple-400/40 transition">
+                        <span>📊 ප්‍රස්ථාර 5 Hub</span>
+                        <span id="badgeCompareCount" class="px-1.5 py-0.2 bg-black/40 rounded-full text-[9px] font-tech text-cyan-300">0/5</span>
+                    </button>
+                    <button id="btnTheory" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-neonPink hover:text-white border border-pink-500/40 text-xs font-semibold text-pink-300 transition shadow-md">
+                        <span>📚 න්‍යාය</span>
+                    </button>
+                    <button id="btnResetView" title="කැමරාව Reset කරන්න" class="p-1.5 px-2 rounded-xl bg-slate-800/90 hover:bg-cyber hover:text-spaceDark border border-slate-700 text-slate-300 text-xs transition flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
                 </div>
             </header>
-            <div id="headerPullTab" class="absolute -bottom-5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-b-xl glass-panel interactive cursor-pointer border-t-0 border-cyan-500/40 text-cyan-400 text-[8px] font-tech font-bold uppercase">
-                ප්‍රසාද් මධුසංඛ ▼
+
+            <!-- Mini Pull Tab -->
+            <div id="headerPullTab" class="absolute -bottom-5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-b-xl glass-panel interactive cursor-pointer border-t-0 border-cyan-500/40 text-cyan-400 hover:text-white hover:bg-cyan-500/20 shadow-lg flex items-center gap-1 transition-all duration-300 group">
+                <span class="text-[8.5px] font-tech tracking-wider uppercase font-bold text-slate-400 group-hover:text-cyan-300">ප්‍රසාද් මධුසංඛ</span>
+                <svg id="pullTabIcon" class="w-3 h-3 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
             </div>
         </div>
 
-        <!-- SPLIT VIEW -->
+        <!-- MAIN SPLIT: CONTROLS & ANALYTICS -->
         <div class="flex-1 flex justify-between items-start pt-1 gap-2.5 overflow-hidden pointer-events-none">
             
-            <!-- CONTROLS PANEL -->
-            <aside id="controlsPanel" class="responsive-drawer w-72 md:w-80 max-h-[85vh] overflow-y-auto glass-panel rounded-2xl p-3 interactive flex-col justify-start shadow-2xl space-y-2 hidden lg:flex">
-                <div class="mobile-drawer-header flex flex-col w-full pb-1 border-b border-slate-700/80 mb-0.5">
+            <!-- LEFT PANEL: CONTROLS -->
+            <aside id="controlsPanel" class="responsive-drawer w-72 md:w-80 max-h-[85vh] overflow-y-auto glass-panel rounded-2xl p-3 interactive flex-col justify-start shadow-2xl space-y-2.5 hidden lg:flex">
+                
+                <div class="mobile-drawer-header flex flex-col w-full pb-1.5 border-b border-slate-700/80 mb-0.5">
                     <div class="drag-pill"></div>
                     <div class="flex items-center justify-between w-full">
-                        <span class="text-xs font-bold text-white uppercase font-tech">පරාමිති පාලකය</span>
-                        <button onclick="closeActiveDrawer()" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs">✕</button>
-                    </div>
-                </div>
-
-                <div class="pb-1 border-b border-slate-700/60">
-                    <span id="motionStatusBadge" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">තන්තුව තදයි (TAUT)</span>
-                    <h2 id="modeHeading" class="text-xs font-bold text-white mt-1">1. තිරස් Air-Track</h2>
-                    <p id="modeSubText" class="text-[9px] text-slate-400 mt-0.5">F = -kx මඟින් සරල අනුවර්තී චලිතය ඇතිවීම.</p>
-                </div>
-
-                <div class="grid grid-cols-4 gap-1 mb-1">
-                    <button id="btnPlay" class="col-span-2 min-h-[34px] py-1 px-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-spaceDark font-bold text-xs active:scale-95">⏸️ නවතන්න</button>
-                    <button id="btnStep" class="min-h-[34px] py-1 px-1 rounded-xl bg-slate-800 text-white font-semibold text-xs border border-slate-700 active:scale-95">⏭ +0.05s</button>
-                    <button id="btnReset" class="min-h-[34px] py-1 px-1 rounded-xl bg-slate-800 text-white font-semibold text-xs border border-slate-700 active:scale-95">🔄 Reset</button>
-                </div>
-
-                <div class="p-1 rounded-xl bg-purple-950/40 border border-purple-500/40">
-                    <button id="btnSaveRun" class="w-full min-h-[32px] py-1 px-2 rounded-lg bg-gradient-to-r from-neonPink via-purple-600 to-cyan-500 text-white font-bold text-xs active:scale-95">
-                        💾 Run එක Save කරන්න
-                    </button>
-                </div>
-
-                <div class="space-y-1.5 text-xs">
-                    <div>
-                        <div class="flex justify-between text-[10.5px]"><span class="text-slate-300">විස්තාරය (a)</span><span id="labelAmp" class="font-tech font-bold text-cyber">4.0 m</span></div>
-                        <input id="sliderAmp" type="range" min="1.0" max="6.0" step="0.1" value="4.0" class="w-full">
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-[10.5px]"><span class="text-slate-300">ස්කන්ධය (m)</span><span id="labelMass" class="font-tech font-bold text-emerald-400">1.0 kg</span></div>
-                        <input id="sliderMass" type="range" min="0.5" max="4.0" step="0.1" value="1.0" class="w-full">
-                    </div>
-                    <div id="wrapperK">
-                        <div class="flex justify-between text-[10.5px]"><span id="titleK" class="text-slate-300">දුනු නියතය (k)</span><span id="labelK" class="font-tech font-bold text-amber-400">20.0 N/m</span></div>
-                        <input id="sliderK" type="range" min="5" max="60" step="1" value="20" class="w-full">
-                    </div>
-                    <div id="wrapperAngle" class="hidden">
-                        <div class="flex justify-between text-[10.5px]"><span class="text-slate-300">ආනති කෝණය (&alpha;)</span><span id="labelAngle" class="font-tech font-bold text-pink-400">30&deg;</span></div>
-                        <input id="sliderAngle" type="range" min="10" max="80" step="1" value="30" class="w-full">
-                    </div>
-                    <div id="wrapperL" class="hidden">
-                        <div class="flex justify-between text-[10.5px]"><span class="text-slate-300">ලෝලක දිග (L)</span><span id="labelL" class="font-tech font-bold text-purple-400">5.0 m</span></div>
-                        <input id="sliderL" type="range" min="2.0" max="8.0" step="0.2" value="5.0" class="w-full">
-                    </div>
-                </div>
-
-                <div class="pt-1.5 border-t border-slate-700/60 grid grid-cols-2 gap-1 text-[9px]">
-                    <label class="flex items-center gap-1 cursor-pointer bg-slate-900/60 p-1 rounded-lg border border-slate-800"><input type="checkbox" id="chkVel" checked class="accent-emerald-500 w-3 h-3"><span class="text-emerald-400">ප්‍රවේගය (v)</span></label>
-                    <label class="flex items-center gap-1 cursor-pointer bg-slate-900/60 p-1 rounded-lg border border-slate-800"><input type="checkbox" id="chkAcc" checked class="accent-rose-500 w-3 h-3"><span class="text-rose-400">ත්වරණය (f)</span></label>
-                    <label class="flex items-center gap-1 cursor-pointer bg-slate-900/60 p-1 rounded-lg border border-slate-800"><input type="checkbox" id="chkSound" checked class="accent-cyber w-3 h-3"><span class="text-cyan-300">🔊 Audio FX</span></label>
-                    <label class="flex items-center gap-1 cursor-pointer bg-slate-900/60 p-1 rounded-lg border border-slate-800"><input type="checkbox" id="chkTrail" checked class="accent-pink-500 w-3 h-3"><span class="text-pink-300">✨ 3D Trail</span></label>
-                    <label class="col-span-2 flex items-center gap-1 cursor-pointer bg-slate-900/60 p-1 rounded-lg border border-slate-800"><input type="checkbox" id="chkHaptic" checked class="accent-amber-500 w-3 h-3"><span class="text-amber-300">📳 Haptic Touch Vibrations</span></label>
-                </div>
-            </aside>
-
-            <!-- ANALYTICS PANEL & 3-IN-1 TABBED VISUALIZER -->
-            <aside id="analyticsPanel" class="responsive-drawer w-72 md:w-80 max-h-[85vh] overflow-y-auto glass-panel rounded-2xl p-2.5 interactive flex-col justify-start shadow-2xl space-y-1.5 hidden lg:flex">
-                <div class="mobile-drawer-header flex flex-col w-full pb-1 border-b border-slate-700/80 mb-0.5">
-                    <div class="drag-pill"></div>
-                    <div class="flex items-center justify-between w-full">
-                        <span class="text-xs font-bold text-white uppercase font-tech">දත්ත සහ ප්‍රස්ථාර</span>
-                        <button onclick="closeActiveDrawer()" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs">✕</button>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-cyber animate-pulse"></span>
+                            <span class="text-xs font-bold text-white uppercase tracking-wider font-tech">පරාමිති පාලකය (Controls)</span>
+                        </div>
+                        <button onclick="closeActiveDrawer()" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700 active:scale-95">
+                            ✕ වසන්න
+                        </button>
                     </div>
                 </div>
 
                 <div>
-                    <div class="grid grid-cols-2 gap-1 text-xs mb-1">
-                        <div class="bg-slate-950/80 p-1 rounded-lg border border-slate-800/80"><div class="text-[8px] text-slate-400">විස්ථාපනය (x)</div><div id="statX" class="font-tech text-xs font-bold text-cyan-400">0.00 m</div></div>
-                        <div class="bg-slate-950/80 p-1 rounded-lg border border-slate-800/80"><div class="text-[8px] text-slate-400">ප්‍රවේගය (v)</div><div id="statV" class="font-tech text-xs font-bold text-emerald-400">0.00 ms⁻¹</div></div>
-                        <div class="bg-slate-950/80 p-1 rounded-lg border border-slate-800/80"><div class="text-[8px] text-slate-400">ත්වරණය (f)</div><div id="statF" class="font-tech text-xs font-bold text-rose-400">0.00 ms⁻²</div></div>
-                        <div class="bg-slate-950/80 p-1 rounded-lg border border-slate-800/80"><div class="text-[8px] text-slate-400">තුලිත දිගුව (e)</div><div id="statE" class="font-tech text-xs font-bold text-amber-400">0.00 m</div></div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-1 text-center bg-slate-950/90 p-1 rounded-lg border border-slate-800/80 font-tech text-[9px]">
-                        <div><div class="text-[7.5px] text-slate-400">&omega;</div><div id="statOmega" class="font-bold text-cyan-300">4.47 r/s</div></div>
-                        <div><div class="text-[7.5px] text-slate-400">T</div><div id="statPeriod" class="font-bold text-amber-300">1.40 s</div></div>
-                        <div><div class="text-[7.5px] text-slate-400">n</div><div id="statFreq" class="font-bold text-emerald-300">0.71 Hz</div></div>
-                    </div>
-                </div>
-
-                <!-- 3-IN-1 TABS -->
-                <div class="bg-slate-950/90 p-1.5 rounded-xl border border-slate-800/80">
-                    <div class="flex items-center justify-between mb-1 pb-1 border-b border-slate-800">
-                        <div class="flex items-center gap-1">
-                            <button onclick="switchTab('circle')" id="tabBtnCircle" class="px-1.5 py-0.5 rounded text-[8.5px] font-tech font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">විමර්ශන වෘත්තය</button>
-                            <button onclick="switchTab('energy')" id="tabBtnEnergy" class="px-1.5 py-0.5 rounded text-[8.5px] font-tech text-slate-400">E - x වක්‍රය</button>
-                            <button onclick="switchTab('phase')" id="tabBtnPhase" class="px-1.5 py-0.5 rounded text-[8.5px] font-tech text-slate-400">Phase Orbit</button>
+                    <!-- Mode Info & Status Badge -->
+                    <div class="pb-1.5 border-b border-slate-700/60">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9px] font-tech text-cyan-400 tracking-wider uppercase font-bold">චලිත තත්ත්වය</span>
+                            <span id="motionStatusBadge" class="text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                                තන්තුව තදයි (TAUT - SHM)
+                            </span>
                         </div>
-                        <span id="tabSubLabel" class="text-[7.5px] font-tech text-slate-400">t = θ / ω</span>
+                        <h2 id="modeHeading" class="text-xs font-bold text-white mt-1">1. තිරස් සුමට Air-Track පද්ධතිය</h2>
+                        <p id="modeSubText" class="text-[10px] text-slate-400 mt-0.5">F = -kx මඟින් ẍ = -ω²x සරල අනුවර්තී චලිතය ඇතිවීම.</p>
                     </div>
-                    <div class="w-full h-24 relative overflow-hidden flex items-center justify-center">
-                        <canvas id="circleCanvas" class="w-full h-full block"></canvas>
-                        <canvas id="energyCurveCanvas" class="w-full h-full hidden"></canvas>
-                        <canvas id="phaseCanvas" class="w-full h-full hidden"></canvas>
+
+                    <!-- Playback Controls -->
+                    <div class="my-2">
+                        <div class="grid grid-cols-4 gap-1 mb-1.5">
+                            <button id="btnPlay" class="col-span-2 min-h-[36px] py-1 px-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 text-spaceDark font-bold text-xs flex items-center justify-center gap-1 shadow-md transition active:scale-95">
+                                <span id="playIcon">⏸️</span> <span id="playLabel">නවතන්න</span>
+                            </button>
+                            <button id="btnStep" class="min-h-[36px] py-1 px-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-slate-700 transition flex items-center justify-center active:scale-95" title="Step +0.05s">
+                                ⏭ +0.05s
+                            </button>
+                            <button id="btnReset" class="min-h-[36px] py-1 px-1 rounded-xl bg-slate-800 hover:bg-rose-900/60 hover:text-rose-300 text-white font-semibold text-xs border border-slate-700 transition flex items-center justify-center active:scale-95">
+                                🔄 Reset
+                            </button>
+                        </div>
+
+                        <!-- Speed Controls -->
+                        <div class="flex items-center justify-between bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-[9.5px] font-tech">
+                            <span class="text-slate-400 ml-1.5">වේගය:</span>
+                            <div class="flex gap-1" id="speedGroup">
+                                <button data-speed="0.25" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">0.25x</button>
+                                <button data-speed="0.5" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">0.5x</button>
+                                <button data-speed="1.0" class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-bold">1.0x</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Run Button -->
+                    <div class="mb-2 p-1.5 rounded-xl bg-purple-950/40 border border-purple-500/40">
+                        <button id="btnSaveRun" class="w-full min-h-[38px] py-1.5 px-2 rounded-lg bg-gradient-to-r from-neonPink via-purple-600 to-cyan-500 hover:opacity-95 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-purple-900/40 transition active:scale-95">
+                            <span>💾 වත්මන් Run එක Save කරන්න</span>
+                            <span class="text-[9.5px] font-tech bg-black/40 px-1 py-0.2 rounded text-cyan-200">+Save</span>
+                        </button>
+                        <p class="text-[8.5px] text-purple-200/80 text-center mt-1 font-sinhala">විවිධ k, m, a වෙනස් කර Runs 5ක් සසඳන්න!</p>
+                    </div>
+
+                    <!-- Sliders -->
+                    <div class="space-y-2 text-xs">
+                        <div class="text-[9.5px] font-tech text-slate-400 uppercase font-semibold">භෞතික පරාමිති (Parameters)</div>
+
+                        <div>
+                            <div class="flex justify-between mb-0.5">
+                                <span class="text-slate-300 text-[11px]">විස්තාරය (<span class="font-tech text-cyan-400 font-bold">a</span>)</span>
+                                <span id="labelAmp" class="font-tech font-bold text-cyber text-xs">4.0 m</span>
+                            </div>
+                            <input id="sliderAmp" type="range" min="1.0" max="6.0" step="0.1" value="4.0" class="w-full">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-0.5">
+                                <span class="text-slate-300 text-[11px]">ස්කන්ධය (<span class="font-tech text-emerald-400 font-bold">m</span>)</span>
+                                <span id="labelMass" class="font-tech font-bold text-emerald-400 text-xs">1.0 kg</span>
+                            </div>
+                            <input id="sliderMass" type="range" min="0.5" max="4.0" step="0.1" value="1.0" class="w-full">
+                        </div>
+
+                        <div id="wrapperK">
+                            <div class="flex justify-between mb-0.5">
+                                <span id="titleK" class="text-slate-300 text-[11px]">දුනු නියතය (<span class="font-tech text-amber-400 font-bold">k</span>)</span>
+                                <span id="labelK" class="font-tech font-bold text-amber-400 text-xs">20.0 N/m</span>
+                            </div>
+                            <input id="sliderK" type="range" min="5" max="60" step="1" value="20" class="w-full">
+                        </div>
+
+                        <div id="wrapperAngle" class="hidden">
+                            <div class="flex justify-between mb-0.5">
+                                <span class="text-slate-300 text-[11px]">ආනති කෝණය (<span class="font-tech text-pink-400 font-bold">&alpha;</span>)</span>
+                                <span id="labelAngle" class="font-tech font-bold text-pink-400 text-xs">30&deg;</span>
+                            </div>
+                            <input id="sliderAngle" type="range" min="10" max="80" step="1" value="30" class="w-full">
+                        </div>
+
+                        <div id="wrapperL" class="hidden">
+                            <div class="flex justify-between mb-0.5">
+                                <span class="text-slate-300 text-[11px]">ලෝලක දිග (<span class="font-tech text-purple-400 font-bold">L</span>)</span>
+                                <span id="labelL" class="font-tech font-bold text-purple-400 text-xs">5.0 m</span>
+                            </div>
+                            <input id="sliderL" type="range" min="2.0" max="8.0" step="0.2" value="5.0" class="w-full">
+                        </div>
                     </div>
                 </div>
 
-                <!-- LIVE ENERGY BARS -->
-                <div class="pt-0.5 space-y-1 text-[8.5px]">
-                    <div class="flex items-center justify-between mb-0.5"><span class="text-[8px] font-tech text-emerald-400 uppercase font-bold">ශක්ති සංස්ථිතිය</span><span id="labelTotEnergy" class="text-[8px] font-tech font-bold text-purple-300">E_tot = 160 J</span></div>
-                    <div>
-                        <div class="flex justify-between text-slate-300 mb-0.5"><span>● චාලක (KE)</span><span id="numKE" class="font-tech text-emerald-400 font-bold">0.0 J</span></div>
-                        <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800"><div id="barKE" class="bg-gradient-to-r from-emerald-500 to-emerald-300 h-full rounded-full" style="width: 0%"></div></div>
+                <!-- 3D Vectors & Haptic Toggle -->
+                <div class="pt-1.5 border-t border-slate-700/60">
+                    <div class="text-[9.5px] font-tech text-slate-400 uppercase font-semibold mb-1">දෛශික සහ ස්මාර්ට් පහසුකම්</div>
+                    <div class="grid grid-cols-2 gap-1 text-[10px]">
+                        <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/60 p-1.5 rounded-lg border border-slate-800">
+                            <input type="checkbox" id="chkVel" checked class="rounded accent-emerald-500 w-3.5 h-3.5">
+                            <span class="text-emerald-400 font-medium">ප්‍රවේගය (v)</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/60 p-1.5 rounded-lg border border-slate-800">
+                            <input type="checkbox" id="chkAcc" checked class="rounded accent-rose-500 w-3.5 h-3.5">
+                            <span class="text-rose-400 font-medium">ත්වරණය (f)</span>
+                        </label>
+                        <label class="col-span-2 flex items-center gap-1.5 cursor-pointer bg-slate-900/60 p-1.5 rounded-lg border border-slate-800">
+                            <input type="checkbox" id="chkHaptic" checked class="rounded accent-cyber w-3.5 h-3.5">
+                            <span class="text-cyan-300 font-medium">📳 Haptic Vibration (Extremes & Slack)</span>
+                        </label>
                     </div>
-                    <div>
-                        <div class="flex justify-between text-slate-300 mb-0.5"><span>● ප්‍රත්‍යාස්ථ (EPE)</span><span id="numEPE" class="font-tech text-cyan-400 font-bold">160.0 J</span></div>
-                        <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800"><div id="barEPE" class="bg-gradient-to-r from-cyan-500 to-blue-400 h-full rounded-full" style="width: 100%"></div></div>
+                </div>
+            </aside>
+
+            <!-- RIGHT PANEL: ANALYTICS & SMART HUD (LAPTOP OPTIMIZED) -->
+            <aside id="analyticsPanel" class="responsive-drawer w-72 md:w-80 max-h-[85vh] overflow-y-auto glass-panel rounded-2xl p-3 interactive flex-col justify-start shadow-2xl space-y-2 hidden lg:flex">
+                
+                <div class="mobile-drawer-header flex flex-col w-full pb-1.5 border-b border-slate-700/80 mb-0.5">
+                    <div class="drag-pill"></div>
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                            <span class="text-xs font-bold text-white uppercase tracking-wider font-tech">දත්ත සහ ප්‍රස්ථාර (Analytics)</span>
+                        </div>
+                        <button onclick="closeActiveDrawer()" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700 active:scale-95">
+                            ✕ වසන්න
+                        </button>
                     </div>
-                    <div id="boxGPE">
-                        <div class="flex justify-between text-slate-300 mb-0.5"><span>● ගුරුත්වාකර්ෂණ (GPE)</span><span id="numGPE" class="font-tech text-amber-400 font-bold">0.0 J</span></div>
-                        <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800"><div id="barGPE" class="bg-gradient-to-r from-amber-500 to-yellow-300 h-full rounded-full" style="width: 0%"></div></div>
+                </div>
+
+                <!-- Telemetry -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] font-tech text-cyber uppercase font-bold tracking-wider">සජීවී දත්ත (Telemetry)</span>
+                        <span class="flex h-1.5 w-1.5 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyber"></span>
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-1 text-xs mb-1">
+                        <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800/80">
+                            <div class="text-[8.5px] text-slate-400">විස්ථාපනය (x)</div>
+                            <div id="statX" class="font-tech text-xs font-bold text-cyan-400">0.00 m</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800/80">
+                            <div class="text-[8.5px] text-slate-400">ප්‍රවේගය (v)</div>
+                            <div id="statV" class="font-tech text-xs font-bold text-emerald-400">0.00 ms⁻¹</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800/80">
+                            <div class="text-[8.5px] text-slate-400">ත්වරණය (f = ẍ)</div>
+                            <div id="statF" class="font-tech text-xs font-bold text-rose-400">0.00 ms⁻²</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-800/80">
+                            <div class="text-[8.5px] text-slate-400">තුලිත දිගුව (e)</div>
+                            <div id="statE" class="font-tech text-xs font-bold text-amber-400">0.00 m</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 text-center bg-slate-950/90 p-1 rounded-lg border border-slate-800/80 font-tech text-[10px]">
+                        <div>
+                            <div class="text-[7.5px] text-slate-400">&omega;</div>
+                            <div id="statOmega" class="font-bold text-cyan-300">4.47 r/s</div>
+                        </div>
+                        <div>
+                            <div class="text-[7.5px] text-slate-400">T</div>
+                            <div id="statPeriod" class="font-bold text-amber-300">1.40 s</div>
+                        </div>
+                        <div>
+                            <div class="text-[7.5px] text-slate-400">n</div>
+                            <div id="statFreq" class="font-bold text-emerald-300">0.71 Hz</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2D Reference Circle Canvas (Compact h-20) -->
+                <div class="bg-slate-950/90 p-1.5 rounded-xl border border-slate-800/80 flex flex-col items-center">
+                    <div class="w-full flex items-center justify-between mb-0.5">
+                        <span class="text-[8.5px] font-tech text-amber-400 uppercase font-bold">විමර්ශන වෘත්තය</span>
+                        <span class="text-[8px] font-tech text-slate-400">t = &theta; / &omega;</span>
+                    </div>
+                    <div class="w-full h-20 relative overflow-hidden flex items-center justify-center">
+                        <canvas id="circleCanvas" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+
+                <!-- 2D Live Energy-Displacement (E - x) Graph (Compact h-20) -->
+                <div class="bg-slate-950/90 p-1.5 rounded-xl border border-slate-800/80 flex flex-col items-center">
+                    <div class="w-full flex items-center justify-between mb-0.5">
+                        <span class="text-[8.5px] font-tech text-cyan-400 uppercase font-bold">ශක්ති - විස්ථාපන (E - x)</span>
+                        <div class="flex items-center gap-1.5 text-[7.5px] font-tech">
+                            <span class="text-cyan-400">● Ep</span>
+                            <span class="text-emerald-400">● Ek</span>
+                            <span class="text-purple-400">― Etot</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-20 relative overflow-hidden flex items-center justify-center">
+                        <canvas id="energyCurveCanvas" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+
+                <!-- Live Energy Bars (Always Fully Visible) -->
+                <div class="pt-0.5">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[8.5px] font-tech text-emerald-400 uppercase font-bold">ශක්ති සංස්ථිතිය (Energy HUD)</span>
+                        <span id="labelTotEnergy" class="text-[8px] font-tech font-bold text-purple-300">E_tot = 160 J</span>
+                    </div>
+
+                    <div class="space-y-1 text-[9px]">
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-0.5">
+                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> චාලක (KE)</span>
+                                <span id="numKE" class="font-tech text-emerald-400 font-bold">0.0 J</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                                <div id="barKE" class="bg-gradient-to-r from-emerald-500 to-emerald-300 h-full rounded-full transition-all duration-75" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-0.5">
+                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-cyber"></span> ප්‍රත්‍යාස්ථ (EPE)</span>
+                                <span id="numEPE" class="font-tech text-cyan-400 font-bold">160.0 J</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                                <div id="barEPE" class="bg-gradient-to-r from-cyan-500 to-blue-400 h-full rounded-full transition-all duration-75" style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <div id="boxGPE">
+                            <div class="flex justify-between text-slate-300 mb-0.5">
+                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ගුරුත්වාකර්ෂණ (GPE)</span>
+                                <span id="numGPE" class="font-tech text-amber-400 font-bold">0.0 J</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                                <div id="barGPE" class="bg-gradient-to-r from-amber-500 to-yellow-300 h-full rounded-full transition-all duration-75" style="width: 0%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </aside>
         </div>
 
-        <!-- MOBILE DOCK -->
+        <!-- MOBILE FLOATING BOTTOM DOCK -->
         <div class="mobile-bottom-dock w-full fixed bottom-2 left-0 right-0 px-3 z-50 pointer-events-none">
             <nav class="w-full max-w-md mx-auto p-1.5 rounded-2xl glass-panel interactive shadow-2xl border border-cyan-500/30 flex items-center justify-around gap-1 bg-slate-950/95">
-                <button onclick="toggleMobileDrawer('controls')" class="flex-1 py-1.5 rounded-xl bg-slate-800/80 active:scale-95 text-slate-200 text-[10px] font-bold flex flex-col items-center">⚙️<span>පාලක</span></button>
-                <button onclick="toggleMobileDrawer('analytics')" class="flex-1 py-1.5 rounded-xl bg-slate-800/80 active:scale-95 text-slate-200 text-[10px] font-bold flex flex-col items-center">📊<span>දත්ත</span></button>
-                <button onclick="document.getElementById('btnOpenAiCopilot').click()" class="flex-1 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-purple-600 active:scale-95 text-white text-[10px] font-bold flex flex-col items-center">🤖<span>AI Tutor</span></button>
-                <button onclick="document.getElementById('btnOpenCompare').click()" class="flex-1 py-1.5 rounded-xl bg-gradient-to-b from-purple-600 to-indigo-700 active:scale-95 text-white text-[10px] font-bold flex flex-col items-center">📈<span>Runs 5</span></button>
+                <button id="btnMobileControls" onclick="toggleMobileDrawer('controls')" class="flex-1 py-1.5 px-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-slate-200 text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 transition">
+                    <span class="text-sm">⚙️</span>
+                    <span>පාලක</span>
+                </button>
+                <button id="btnMobileAnalytics" onclick="toggleMobileDrawer('analytics')" class="flex-1 py-1.5 px-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-slate-200 text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 transition">
+                    <span class="text-sm">📊</span>
+                    <span>දත්ත & E-x</span>
+                </button>
+                <button onclick="document.getElementById('btnOpenCompare').click()" class="flex-1 py-1.5 px-1 rounded-xl bg-gradient-to-b from-purple-600 to-indigo-700 active:scale-95 text-white text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 transition shadow-lg shadow-purple-600/30">
+                    <span class="text-sm">📈</span>
+                    <span>ප්‍රස්ථාර 5</span>
+                </button>
+                <button id="btnFocusMode" onclick="toggleFocusMode()" class="flex-1 py-1.5 px-1 rounded-xl bg-slate-800/80 hover:bg-cyan-500/20 active:scale-95 text-cyan-300 text-[11px] font-bold flex flex-col items-center justify-center gap-0.5 transition border border-cyan-500/30">
+                    <span id="focusIcon" class="text-sm">👁️</span>
+                    <span id="focusLabel">දසුන</span>
+                </button>
             </nav>
         </div>
+
+        <!-- Desktop Bottom Bar -->
+        <footer class="w-full hidden lg:flex items-center justify-center pointer-events-none mb-0.5">
+            <div class="px-4 py-1 rounded-xl glass-panel text-[10.5px] text-slate-400 flex items-center gap-3 interactive shadow-lg">
+                <span class="text-cyan-400 font-semibold flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    360° Drag: කරකවන්න
+                </span>
+                <span class="text-slate-600">|</span>
+                <span class="text-emerald-400 font-semibold">🔒 Zoom අක්‍රියයි</span>
+                <span class="text-slate-600">|</span>
+                <span class="text-pink-400 font-bold">ප්‍රසාද් මධුසංඛ - හිතට වදින මැත්ස්</span>
+            </div>
+        </footer>
     </div>
 
-    <!-- AI COPILOT MODAL -->
-    <div id="aiCopilotModal" class="fixed inset-0 z-[85] bg-black/90 hidden flex items-center justify-center p-2.5 md:p-6">
-        <div class="glass-panel w-full max-w-3xl max-h-[90vh] rounded-3xl p-4 md:p-6 flex flex-col border border-cyan-400/50 relative shadow-2xl overflow-hidden interactive bg-slate-950">
-            <div class="flex items-center justify-between pb-2 border-b border-slate-700">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center font-bold text-white text-base">🤖</div>
-                    <div><h3 class="text-xs md:text-sm font-bold text-white">AI භෞතික විද්‍යා සහායක (Exam Copilot)</h3></div>
-                </div>
-                <button id="btnCloseAiCopilot" class="p-1 px-2.5 rounded-xl bg-slate-800 hover:bg-rose-900 text-slate-300">✕</button>
-            </div>
-            <div class="overflow-y-auto pr-1 mt-3 space-y-3 text-xs">
-                <div class="bg-gradient-to-br from-slate-900 to-indigo-950/40 p-3 rounded-2xl border border-cyan-500/30">
-                    <div class="flex items-center justify-between mb-1.5"><span class="font-bold text-cyan-300">සජීවී AI රෝග විනිශ්චය</span><span id="aiStatusPill" class="text-[9px] font-tech font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Normal</span></div>
-                    <div id="aiDiagnosisText" class="text-slate-300 leading-relaxed font-sinhala text-[11px]"></div>
-                </div>
-                <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-                    <div class="font-bold text-amber-300 mb-1">💡 ස්මාර්ට් පියවරෙන් පියවර ගණකය</div>
-                    <div class="flex items-center gap-2 mb-2">
-                        <input id="aiInputX" type="number" step="0.1" value="2.0" class="bg-slate-950 border border-slate-700 px-3 py-1 rounded-xl font-tech text-white text-xs w-24 outline-none">
-                        <span class="text-slate-400">m</span>
-                        <button id="btnAiSolve" class="px-3 py-1 rounded-xl bg-cyan-500 text-spaceDark font-bold text-xs active:scale-95">විසඳන්න ➔</button>
-                    </div>
-                    <div id="aiSolverOutput" class="p-2 bg-slate-950 rounded-xl border border-slate-800 font-tech text-slate-300 text-[10.5px]"></div>
-                </div>
-                <div class="bg-purple-950/30 p-3 rounded-2xl border border-purple-500/30">
-                    <div class="flex items-center justify-between mb-1"><span class="font-bold text-purple-300">🎯 A/L විභාග අභියෝගය (Smart MCQ)</span><button id="btnAiNewQuestion" class="text-[9px] font-tech text-cyan-300 hover:underline">🔄 අලුත් ප්‍රශ්නයක්</button></div>
-                    <p id="aiQuestionText" class="text-slate-200 font-sinhala text-[11px] mb-2"></p>
-                    <div id="aiQuizOptions" class="grid grid-cols-2 gap-1.5 text-xs font-tech"></div>
-                    <div id="aiQuizFeedback" class="mt-2 text-[10.5px] font-sinhala font-bold hidden"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- COMPARISON HUB MODAL -->
+    <!-- 5-RUN COMPARISON HUB MODAL -->
     <div id="compareModal" class="fixed inset-0 z-[80] bg-black/90 hidden flex items-center justify-center p-2.5 md:p-6">
         <div class="glass-panel w-full max-w-5xl max-h-[94vh] rounded-3xl p-3.5 md:p-6 flex flex-col border border-cyan-500/50 relative shadow-2xl overflow-hidden interactive bg-slate-950">
             <div class="flex items-center justify-between pb-2 border-b border-slate-700">
-                <h3 class="text-xs md:text-base font-bold text-white flex items-center gap-2"><span>ප්‍රස්ථාර සංසන්දනය (5-Run Hub)</span></h3>
-                <div class="flex items-center gap-1.5">
-                    <button id="btnExportCSV" class="px-2.5 py-1.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/40 text-xs font-semibold">📥 CSV Export</button>
-                    <button id="btnClearRuns" class="px-2 py-1.5 rounded-xl bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-600/40 text-xs font-semibold">🗑️ මකන්න</button>
-                    <button id="btnCloseCompare" class="p-1 px-2.5 rounded-xl bg-slate-800 text-slate-300">✕</button>
-                </div>
-            </div>
-            <div class="overflow-y-auto pr-1 mt-2.5 space-y-3">
-                <div class="bg-slate-950 rounded-2xl p-2.5 border border-slate-800">
-                    <div class="relative w-full h-44 md:h-56 bg-slate-950 rounded-xl overflow-hidden">
-                        <canvas id="multiWaveCanvas" class="w-full h-full block"></canvas>
-                        <div id="noRunsMsg" class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs">තවමත් Runs කිසිවක් Save කර නැත.</div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-purple-600/30 text-purple-300 border border-purple-500/40 flex items-center justify-center font-tech font-bold text-sm">
+                        ∑5
+                    </div>
+                    <div>
+                        <h3 class="text-xs md:text-base font-bold text-white flex items-center gap-2">
+                            <span>ප්‍රස්ථාර සංසන්දනය (5-Run Hub)</span>
+                            <span class="text-[9px] font-tech text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded-full border border-purple-500/30">A/L Master</span>
+                        </h3>
+                        <p class="text-[9.5px] md:text-[10.5px] text-slate-400">විවිධ පරාමිති යටතේ (x-t) තරංග සහ ආවර්ත කාලයන් සසඳා බලන්න.</p>
                     </div>
                 </div>
-                <div class="bg-slate-950 rounded-2xl p-2.5 border border-slate-800 overflow-x-auto">
-                    <table class="w-full text-left text-xs font-tech">
-                        <thead class="bg-slate-900 text-[9px] text-slate-400 uppercase border-b border-slate-800">
-                            <tr><th class="py-1 px-2">Run</th><th class="py-1">පාට</th><th class="py-1 px-2 font-sinhala">මාදිලිය</th><th class="py-1">a(m)</th><th class="py-1">&omega;</th><th class="py-1">m</th><th class="py-1">k</th><th class="py-1 font-bold">T(s)</th><th class="py-1">Vmax</th><th class="py-1">Fmax</th><th class="py-1 text-center font-sinhala">ඉවත්</th></tr>
-                        </thead>
-                        <tbody id="compareTableBody" class="divide-y divide-slate-800/60 text-slate-300"></tbody>
-                    </table>
+                <div class="flex items-center gap-1.5">
+                    <button id="btnClearRuns" class="px-2 py-1.5 rounded-xl bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-600/40 text-[10px] md:text-xs font-semibold transition active:scale-95">
+                        🗑️ මකන්න
+                    </button>
+                    <button id="btnCloseCompare" class="p-1.5 px-2.5 rounded-xl bg-slate-800 hover:bg-rose-900 text-slate-300 hover:text-white transition active:scale-95">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-y-auto pr-1 mt-2.5 space-y-3">
+                <div class="bg-slate-950 rounded-2xl p-2.5 border border-slate-800 shadow-inner">
+                    <div class="flex items-center justify-between mb-1 px-1">
+                        <span class="text-[9.5px] font-tech text-cyan-400 font-bold uppercase tracking-wider">සමගාමී විස්ථාපන - කාල ප්‍රස්ථාර (x-t)</span>
+                        <div class="text-[8.5px] font-tech text-slate-400 flex items-center gap-2">
+                            <span>Y: x (-6m සිට +6m)</span>
+                            <span>X: t (0 සිට 4s)</span>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-44 md:h-56 bg-slate-950 rounded-xl overflow-hidden border border-slate-800/80">
+                        <canvas id="multiWaveCanvas" class="w-full h-full block"></canvas>
+                        <div id="noRunsMsg" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-xs font-sinhala text-center p-2">
+                            <span>තවමත් Runs කිසිවක් Save කර නැත.</span>
+                            <span class="text-[10px] text-cyan-400 mt-0.5">පරාමිති සකස් කර "වත්මන් Run එක Save කරන්න" ක්ලික් කරන්න.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 rounded-2xl p-2.5 border border-slate-800">
+                    <div class="flex items-center justify-between mb-1.5 px-1">
+                        <span class="text-[9.5px] font-tech text-amber-400 font-bold uppercase tracking-wider">පරාමිති වගුව (Comparison Matrix)</span>
+                        <span class="text-[8.5px] text-slate-400">උපරිම 5 Runs</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs font-tech">
+                            <thead class="bg-slate-900/90 text-[9px] md:text-[10px] text-slate-400 uppercase border-b border-slate-800">
+                                <tr>
+                                    <th class="py-1.5 px-2">Run</th>
+                                    <th class="py-1.5 px-1">පාට</th>
+                                    <th class="py-1.5 px-2 font-sinhala">මාදිලිය</th>
+                                    <th class="py-1.5 px-1 text-cyan-400">a(m)</th>
+                                    <th class="py-1.5 px-1 text-cyan-300">&omega;</th>
+                                    <th class="py-1.5 px-1 text-emerald-400">m</th>
+                                    <th class="py-1.5 px-1 text-amber-400">k</th>
+                                    <th class="py-1.5 px-1 text-amber-300 font-bold">T(s)</th>
+                                    <th class="py-1.5 px-1 text-emerald-300">Vmax</th>
+                                    <th class="py-1.5 px-1 text-rose-400">Fmax</th>
+                                    <th class="py-1.5 px-1 text-center font-sinhala">ඉවත්</th>
+                                </tr>
+                            </thead>
+                            <tbody id="compareTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="p-2 bg-cyan-950/30 rounded-xl border border-cyan-500/30 text-[11px] text-slate-300">
+                    <span class="font-bold text-cyan-300">💡 විභාග Hack:</span>
+                    <span class="ml-1">එකම $k$ සහ $m$ තබා විස්තාරය $a$ වෙනස් කර Runs දෙකක් සසඳන්න. විස්තාරය වෙනස් වුවද ආවර්ත කාලය $T = 2\pi\sqrt{m/k}$ නොවෙනස් වන බව (Isochronous) ප්‍රස්ථාරවලින් තහවුරු වේ!</span>
                 </div>
             </div>
         </div>
@@ -305,63 +644,89 @@
     <!-- THEORY MODAL -->
     <div id="theoryModal" class="fixed inset-0 z-[80] bg-black/90 hidden flex items-center justify-center p-3 md:p-4">
         <div class="glass-panel w-full max-w-2xl max-h-[85vh] rounded-3xl p-4 md:p-5 flex flex-col border border-cyan-500/40 relative shadow-2xl interactive bg-slate-950">
-            <div class="flex items-center justify-between pb-2 border-b border-slate-700">
-                <h3 class="text-xs md:text-sm font-bold text-white">සරල අනුවර්තී චලිතය (SHM) - විභාග සටහන</h3>
-                <button id="btnCloseTheory" class="p-1 px-2 rounded-xl bg-slate-800 text-slate-300">✕</button>
+            <div class="flex items-center justify-between pb-2.5 border-b border-slate-700">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-pink-500/20 text-neonPink flex items-center justify-center font-bold text-sm">∑</div>
+                    <div>
+                        <h3 class="text-xs md:text-sm font-bold text-white">සරල අනුවර්තී චලිතය (SHM) - විභාග සටහන</h3>
+                        <p class="text-[9px] text-cyan-400 font-tech">ප්‍රසාද් මධුසංඛ | හිතට වදින මැත්ස්</p>
+                    </div>
+                </div>
+                <button id="btnCloseTheory" class="p-1 px-2 rounded-xl bg-slate-800 hover:bg-rose-900 text-slate-300 hover:text-white transition active:scale-95">
+                    ✕
+                </button>
             </div>
-            <div class="overflow-y-auto pr-1 mt-2.5 space-y-2 text-xs text-slate-300 font-sinhala">
+
+            <div class="overflow-y-auto pr-1 mt-2.5 space-y-3 text-xs text-slate-300 leading-relaxed font-sinhala">
                 <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
-                    <h4 class="font-bold text-cyan-300 mb-1">1. මූලික සමීකරණ</h4>
-                    <p>ẍ = -ω² x &emsp;|&emsp; v² = ω²(a² - x²) &emsp;|&emsp; T = 2π / ω</p>
+                    <h4 class="font-bold text-cyan-300 text-xs mb-1">1. මූලික සමීකරණ ත්‍රිත්වය</h4>
+                    <p>විස්ථාපනය $x$ විට ත්වරණය $f$: $\ddot{x} = -\omega^2 x$.</p>
+                    <div class="mt-1.5 p-1.5 bg-slate-950 rounded-lg text-center font-tech text-cyan-400 font-bold border border-cyan-500/30 text-[10.5px]">
+                        ẍ = -ω² x &emsp;|&emsp; v² = ω²(a² - x²) &emsp;|&emsp; T = 2π / ω
+                    </div>
                 </div>
+
                 <div class="bg-pink-950/30 p-2.5 rounded-xl border border-pink-500/40">
-                    <h4 class="font-bold text-neonPink mb-1">2. සිරස් තන්තුව ලිහිල් වීම (Slack String)</h4>
-                    <p>a > e විට ස්වාභාවික මට්ටම පසුකරද්දී ආතතිය T = 0 වී ගුරුත්වය යටතේ නිදහස් ප්‍රක්ෂිප්තයක් වේ. T_tot = 2 × (t_SHM + t_gravity).</p>
+                    <h4 class="font-bold text-neonPink text-xs mb-1">🔥 2. සිරස් තන්තුව ලිහිල් වීම (Slack String Exam Model)</h4>
+                    <p>ස්වාභාවික දිග $l$ වූ තන්තුවක තුලිත දිගුව $e = \frac{mg}{k} = \frac{mgl}{\lambda}$ වේ.</p>
+                    <ul class="list-disc list-inside mt-1 space-y-0.5 text-slate-300 text-[10.5px]">
+                        <li>විස්තාරය <strong class="text-neonPink">a &gt; e</strong> විට: අංශුව ඉහළට ගොස් ස්වාභාවික මට්ටම ($x = -e$) පසුකරන ක්ෂණයේදී තන්තුවේ ආතතිය <strong class="text-neonPink">T = 0 (ලිහිල්)</strong> වේ!</li>
+                        <li>එතැන් සිට අංශුව ගුරුත්වය යටතේ නිදහස් ප්‍රක්ෂිප්තයක් ($a = -g$) ලෙස උපරිම උසට ගොස් නැවත පැමිණේ.</li>
+                        <li><strong>මුළු කාලය:</strong> $T_{\text{tot}} = 2 \times (t_{\text{SHM}} + t_{\text{gravity}})$.</li>
+                    </ul>
                 </div>
+
+                <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-amber-300 text-xs mb-1">3. ආනත තලය (Inclined Plane)</h4>
+                    <p>ආනත තලය ඔස්සේ ගුරුත්ව සංරචකය $mg \sin\alpha$ බැවින් තුලිතතා දිගුව $e = \frac{mg \sin\alpha}{k}$ වේ.</p>
+                </div>
+            </div>
+
+            <div class="mt-2.5 pt-2 border-t border-slate-700 flex justify-between items-center text-[10px] text-slate-400">
+                <span>ප්‍රසාද් මධුසංඛ - Combined Mathematics</span>
+                <button onclick="document.getElementById('theoryModal').classList.add('hidden')" class="px-3 py-1 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-spaceDark font-bold text-xs">
+                    තේරුම් ගත්තා
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- JAVASCRIPT PHYSICS SIMULATION ENGINE & 3D ENGINE -->
     <script>
         const state = {
-            mode: 1, isRunning: true, speedMultiplier: 1.0, time: 0,
-            amplitude: 4.0, mass: 1.0, k: 20.0, naturalLength: 3.8,
-            inclineAngle: 30 * (Math.PI / 180), pendulumLength: 5.0, g: 9.81,
-            x: 4.0, v: 0.0, f: 0.0, omega: 4.47, period: 1.40, freq: 0.71, eqExtension: 0.0, isSlack: false,
-            ke: 0, epe: 0, gpe: 0, totalEnergy: 0,
-            hapticEnabled: true, soundEnabled: true, trailEnabled: true, activeTab: 'circle'
+            mode: 1,
+            isRunning: true,
+            speedMultiplier: 1.0,
+            time: 0,
+
+            amplitude: 4.0,
+            mass: 1.0,
+            k: 20.0,
+            naturalLength: 3.8,
+            inclineAngle: 30 * (Math.PI / 180),
+            pendulumLength: 5.0,
+            g: 9.81,
+
+            x: 4.0,
+            v: 0.0,
+            f: 0.0,
+            omega: 4.47,
+            period: 1.40,
+            freq: 0.71,
+            eqExtension: 0.0,
+            isSlack: false,
+
+            ke: 0,
+            epe: 0,
+            gpe: 0,
+            totalEnergy: 0,
+            hapticEnabled: true
         };
 
         const RUN_COLORS = ['#00f2fe', '#ff007f', '#10b981', '#f59e0b', '#a855f7'];
         const savedRuns = [];
 
-        // WEB AUDIO FX
-        let audioCtx = null, oscillator = null, gainNode = null;
-        function initAudio() {
-            if (audioCtx) return;
-            try {
-                const AudioClass = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioClass();
-                oscillator = audioCtx.createOscillator();
-                gainNode = audioCtx.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start();
-            } catch (e) {}
-        }
-
-        function updateAudio() {
-            if (!state.soundEnabled || !audioCtx || !gainNode || !oscillator) return;
-            if (!state.isRunning) { gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05); return; }
-            const norm = Math.abs(state.v) / (state.omega * state.amplitude || 1);
-            oscillator.frequency.setTargetAtTime(160 + norm * 380, audioCtx.currentTime, 0.04);
-            gainNode.gain.setTargetAtTime(Math.min(0.06, norm * 0.05), audioCtx.currentTime, 0.04);
-        }
-
-        // THREE.JS 3D SCENE
+        // 3D SCENE SETUP
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x070a12, 0.018);
@@ -369,18 +734,55 @@
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 4.0, 24);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
+        // TOUCH OPTIMIZED ORBIT CONTROLS
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enableZoom = false; controls.enablePan = false; controls.rotateSpeed = 0.85;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.enableZoom = false;
+        controls.enablePan = false;
+        controls.rotateSpeed = 0.85;
+        controls.minPolarAngle = 0.05;
+        controls.maxPolarAngle = Math.PI - 0.05;
+        controls.target.set(0, 0, 0);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+        if (controls.touches) {
+            controls.touches.ONE = THREE.TOUCH.ROTATE;
+            controls.touches.TWO = THREE.TOUCH.DO_NOTHING;
+        }
+
+        renderer.domElement.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+
+        renderer.domElement.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+
+        renderer.domElement.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
+
+        // LIGHTS
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+        scene.add(ambientLight);
+
         const dirLight = new THREE.DirectionalLight(0xffffff, 1.3);
         dirLight.position.set(12, 25, 18);
+        dirLight.castShadow = true;
         scene.add(dirLight);
+
+        const cyanSpot = new THREE.SpotLight(0x00f2fe, 1.8, 50, Math.PI / 4, 0.5, 1.2);
+        cyanSpot.position.set(-15, 15, 10);
+        scene.add(cyanSpot);
+
+        const pinkPoint = new THREE.PointLight(0xff007f, 1.6, 45);
+        pinkPoint.position.set(12, -4, 10);
+        scene.add(pinkPoint);
 
         const grid = new THREE.GridHelper(50, 50, 0x00f2fe, 0x1e293b);
         grid.position.y = -3.2;
@@ -389,574 +791,1357 @@
         const simGroup = new THREE.Group();
         scene.add(simGroup);
 
-        // TRAIL
-        const TRAIL_LEN = 45, trailPositions = new Float32Array(TRAIL_LEN * 3);
-        const trailGeo = new THREE.BufferGeometry();
-        trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
-        const trailLine = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.6 }));
-        simGroup.add(trailLine);
+        // PROCEDURAL AIR-TRACK
+        function createTrack() {
+            const grp = new THREE.Group();
+            const railGeo = new THREE.BoxGeometry(26, 0.45, 3.2);
+            const railMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+            const rail = new THREE.Mesh(railGeo, railMat);
+            rail.position.y = -1.25;
+            rail.receiveShadow = true;
+            grp.add(rail);
 
-        function updateTrail(pos) {
-            if (!state.trailEnabled) { trailLine.visible = false; return; }
-            trailLine.visible = true;
-            const arr = trailGeo.attributes.position.array;
-            for (let i = (TRAIL_LEN - 1) * 3; i >= 3; i -= 3) {
-                arr[i] = arr[i - 3]; arr[i + 1] = arr[i - 2]; arr[i + 2] = arr[i - 1];
+            const stripGeo = new THREE.PlaneGeometry(24, 0.35);
+            const stripMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9, roughness: 0.15 });
+            const strip = new THREE.Mesh(stripGeo, stripMat);
+            strip.rotation.x = -Math.PI / 2;
+            strip.position.set(0, -1.01, 1.2);
+            grp.add(strip);
+
+            for (let i = -10; i <= 10; i++) {
+                const tickGeo = new THREE.BoxGeometry(0.04, 0.02, i % 5 === 0 ? 0.32 : 0.16);
+                const tickMat = new THREE.MeshBasicMaterial({ color: i === 0 ? 0x00f2fe : (i % 5 === 0 ? 0xffffff : 0x94a3b8) });
+                const tick = new THREE.Mesh(tickGeo, tickMat);
+                tick.position.set(i, -1.0, 1.2);
+                grp.add(tick);
             }
-            arr[0] = pos.x; arr[1] = pos.y; arr[2] = pos.z;
-            trailGeo.attributes.position.needsUpdate = true;
+            return grp;
         }
+        const horizontalTrack = createTrack();
+        simGroup.add(horizontalTrack);
 
-        // 3D OBJECTS
-        const trackMesh = new THREE.Mesh(new THREE.BoxGeometry(26, 0.45, 3.2), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-        trackMesh.position.y = -1.25; simGroup.add(trackMesh);
-
-        const clampMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+        const clampMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.2 });
         const wallLeft = new THREE.Mesh(new THREE.BoxGeometry(1.4, 4.2, 3.8), clampMat);
+        wallLeft.castShadow = true;
+        simGroup.add(wallLeft);
+
         const wallRight = new THREE.Mesh(new THREE.BoxGeometry(1.4, 4.2, 3.8), clampMat);
-        simGroup.add(wallLeft); simGroup.add(wallRight);
+        wallRight.castShadow = true;
+        simGroup.add(wallRight);
 
-        const ceilingClamp = new THREE.Mesh(new THREE.BoxGeometry(6, 0.8, 2.5), clampMat);
-        ceilingClamp.position.set(0, 8.5, 0); simGroup.add(ceilingClamp);
+        const ceilingClamp = new THREE.Group();
+        const ceilBeam = new THREE.Mesh(new THREE.BoxGeometry(6, 0.8, 2.5), clampMat);
+        const ceilEyelet = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.1, 16, 24), new THREE.MeshStandardMaterial({ color: 0x00f2fe, metalness: 0.95 }));
+        ceilEyelet.rotation.x = Math.PI / 2;
+        ceilEyelet.position.y = -0.5;
+        ceilingClamp.add(ceilBeam);
+        ceilingClamp.add(ceilEyelet);
+        ceilingClamp.position.set(0, 8.5, 0);
+        simGroup.add(ceilingClamp);
 
-        const massGroup = new THREE.Group(); simGroup.add(massGroup);
-        const bodyMatTaut = new THREE.MeshStandardMaterial({ color: 0x00f2fe, metalness: 0.9, roughness: 0.15 });
-        const bodyMatSlack = new THREE.MeshStandardMaterial({ color: 0xff007f, metalness: 0.9, roughness: 0.15 });
+        // MASS BODY
+        const massGroup = new THREE.Group();
+        simGroup.add(massGroup);
+
+        const bodyMatTaut = new THREE.MeshStandardMaterial({ color: 0x00f2fe, metalness: 0.9, roughness: 0.15, emissive: 0x003344, emissiveIntensity: 0.6 });
+        const bodyMatSlack = new THREE.MeshStandardMaterial({ color: 0xff007f, metalness: 0.9, roughness: 0.15, emissive: 0x660022, emissiveIntensity: 0.9 });
         const massSphere = new THREE.Mesh(new THREE.SphereGeometry(1.05, 32, 32), bodyMatTaut);
+        massSphere.castShadow = true;
         massGroup.add(massSphere);
 
-        const trolleyGroup = new THREE.Group();
-        const cartBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.6, 1.6), new THREE.MeshStandardMaterial({ color: 0x00f2fe }));
-        trolleyGroup.add(cartBody); simGroup.add(trolleyGroup); trolleyGroup.visible = false;
+        const needle = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.45, 12), new THREE.MeshBasicMaterial({ color: 0xff0055 }));
+        needle.rotation.x = Math.PI;
+        needle.position.set(0, -1.05, 1.15);
+        massGroup.add(needle);
 
-        const wedgeGroup = new THREE.Group(); simGroup.add(wedgeGroup);
-        function buildIncline(rad) {
-            while (wedgeGroup.children.length > 0) wedgeGroup.remove(wedgeGroup.children[0]);
-            const len = 22, h = len * Math.sin(rad), b = len * Math.cos(rad);
+        // TROLLEY & INCLINE
+        const trolleyGroup = new THREE.Group();
+        const cartBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.6, 1.6), new THREE.MeshStandardMaterial({ color: 0x00f2fe, metalness: 0.85, roughness: 0.2 }));
+        cartBody.castShadow = true;
+        trolleyGroup.add(cartBody);
+
+        const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 24);
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9, roughness: 0.3 });
+        [[-0.8, -0.3, 0.9], [0.8, -0.3, 0.9], [-0.8, -0.3, -0.9], [0.8, -0.3, -0.9]].forEach(pos => {
+            const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+            wheel.rotation.x = Math.PI / 2;
+            wheel.position.set(...pos);
+            wheel.castShadow = true;
+            trolleyGroup.add(wheel);
+        });
+        simGroup.add(trolleyGroup);
+        trolleyGroup.visible = false;
+
+        const wedgeGroup = new THREE.Group();
+        simGroup.add(wedgeGroup);
+
+        function buildRealisticInclineRamp(angleRad) {
+            while (wedgeGroup.children.length > 0) {
+                const obj = wedgeGroup.children[0];
+                wedgeGroup.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+            }
+
+            const rampLen = 22;
+            const h = rampLen * Math.sin(angleRad);
+            const baseLen = rampLen * Math.cos(angleRad);
+
             const shape = new THREE.Shape();
-            shape.moveTo(-b / 2, -1.5); shape.lineTo(b / 2, -1.5); shape.lineTo(-b / 2, -1.5 + h); shape.closePath();
-            const geo = new THREE.ExtrudeGeometry(shape, { depth: 3.6, bevelEnabled: false });
-            const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-            m.position.z = -1.8; wedgeGroup.add(m);
+            shape.moveTo(-baseLen / 2, -1.5);
+            shape.lineTo(baseLen / 2, -1.5);
+            shape.lineTo(-baseLen / 2, -1.5 + h);
+            shape.closePath();
+
+            const geo = new THREE.ExtrudeGeometry(shape, { depth: 3.6, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.08, bevelThickness: 0.08 });
+            const mat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.3 });
+            const wedgeMesh = new THREE.Mesh(geo, mat);
+            wedgeMesh.position.z = -1.8;
+            wedgeMesh.receiveShadow = true;
+            wedgeGroup.add(wedgeMesh);
+
+            const railMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.1 });
+            const railLeftGeo = new THREE.CylinderGeometry(0.08, 0.08, rampLen, 16);
+            const rail1 = new THREE.Mesh(railLeftGeo, railMat);
+            const rail2 = new THREE.Mesh(railLeftGeo, railMat);
+            rail1.rotation.z = - (Math.PI / 2 - angleRad);
+            rail2.rotation.z = - (Math.PI / 2 - angleRad);
+
+            const midX = 0;
+            const midY = -1.5 + h / 2;
+            rail1.position.set(midX, midY + 0.15, 0.85);
+            rail2.position.set(midX, midY + 0.15, -0.85);
+            wedgeGroup.add(rail1);
+            wedgeGroup.add(rail2);
         }
 
-        const cordMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 1.0, 8), new THREE.MeshStandardMaterial({ color: 0x00f2fe }));
+        const cordMatTaut = new THREE.MeshStandardMaterial({ color: 0x00f2fe, metalness: 0.8, roughness: 0.2 });
+        const cordMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 1.0, 10), cordMatTaut);
         simGroup.add(cordMesh);
 
-        const SLACK_SEGS = 32, slackPositions = new Float32Array((SLACK_SEGS + 1) * 3);
+        const SLACK_SEGS = 32;
+        const slackPositions = new Float32Array((SLACK_SEGS + 1) * 3);
         const slackGeo = new THREE.BufferGeometry();
         slackGeo.setAttribute('position', new THREE.BufferAttribute(slackPositions, 3));
-        const slackLine = new THREE.Line(slackGeo, new THREE.LineBasicMaterial({ color: 0xff007f, linewidth: 2.5 }));
+        const slackLine = new THREE.Line(slackGeo, new THREE.LineBasicMaterial({ color: 0xff007f, linewidth: 3 }));
         simGroup.add(slackLine);
 
-        let springMesh1 = null, springMesh2 = null;
-        function makeSpring(start, end, mat) {
-            const dir = new THREE.Vector3().subVectors(end, start), len = dir.length();
-            if (len < 0.2) return null;
-            const pts = [];
-            for (let i = 0; i <= 80; i++) {
-                const t = i / 80, theta = t * Math.PI * 2 * 14;
-                pts.push(new THREE.Vector3(start.x + dir.x * t + Math.cos(theta) * 0.45, start.y + dir.y * t + Math.sin(theta) * 0.45, start.z + dir.z * t));
+        const springMatChrome = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.98, roughness: 0.12 });
+        const springMatGold = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.95, roughness: 0.15 });
+
+        let springMesh1 = null;
+        let springMesh2 = null;
+
+        function buildHelicalSpringMesh(startVec, endVec, coils = 16, radius = 0.52, wireRadius = 0.065, material = springMatChrome) {
+            const dir = new THREE.Vector3().subVectors(endVec, startVec);
+            const totalLen = dir.length();
+            if (totalLen < 0.25) return null;
+
+            const dirNorm = dir.clone().normalize();
+            let up = new THREE.Vector3(0, 1, 0);
+            if (Math.abs(dirNorm.dot(up)) > 0.9) up = new THREE.Vector3(0, 0, 1);
+            const side = new THREE.Vector3().crossVectors(dirNorm, up).normalize();
+            up = new THREE.Vector3().crossVectors(side, dirNorm).normalize();
+
+            const points = [];
+            const numSegments = 120;
+            const hookLen = 0.35;
+            const activeLen = Math.max(0.1, totalLen - hookLen * 2);
+
+            points.push(startVec.clone());
+            points.push(new THREE.Vector3().addVectors(startVec, dirNorm.clone().multiplyScalar(hookLen)));
+
+            for (let i = 0; i <= numSegments; i++) {
+                const t = i / numSegments;
+                const theta = t * Math.PI * 2 * coils;
+                const centerOnAxis = new THREE.Vector3().addVectors(startVec, dirNorm.clone().multiplyScalar(hookLen + t * activeLen));
+                const radialOffset = new THREE.Vector3()
+                    .addScaledVector(side, Math.cos(theta) * radius)
+                    .addScaledVector(up, Math.sin(theta) * radius);
+                points.push(centerOnAxis.add(radialOffset));
             }
-            return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, 0.06, 6, false), mat);
+
+            points.push(new THREE.Vector3().subVectors(endVec, dirNorm.clone().multiplyScalar(hookLen)));
+            points.push(endVec.clone());
+
+            const curve = new THREE.CatmullRomCurve3(points);
+            const tubeGeo = new THREE.TubeGeometry(curve, 100, wireRadius, 6, false);
+            return new THREE.Mesh(tubeGeo, material);
         }
 
-        function updateSpring1(start, end) {
-            if (springMesh1) simGroup.remove(springMesh1);
-            springMesh1 = makeSpring(start, end, new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+        function updateSpring1(startVec, endVec) {
+            if (springMesh1) {
+                simGroup.remove(springMesh1);
+                springMesh1.geometry.dispose();
+            }
+            springMesh1 = buildHelicalSpringMesh(startVec, endVec, 16, 0.52, 0.065, springMatChrome);
             if (springMesh1) simGroup.add(springMesh1);
         }
-        function updateSpring2(start, end) {
-            if (springMesh2) simGroup.remove(springMesh2);
-            springMesh2 = makeSpring(start, end, new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9 }));
+
+        function updateSpring2(startVec, endVec) {
+            if (springMesh2) {
+                simGroup.remove(springMesh2);
+                springMesh2.geometry.dispose();
+            }
+            springMesh2 = buildHelicalSpringMesh(startVec, endVec, 16, 0.52, 0.065, springMatGold);
             if (springMesh2) simGroup.add(springMesh2);
         }
 
-        const arrowVel = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 1, 0x10b981, 0.4, 0.2);
-        const arrowAcc = new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(), 1, 0xf43f5e, 0.4, 0.2);
-        simGroup.add(arrowVel); simGroup.add(arrowAcc);
-
-        // 3-IN-1 TABS DRAWING
-        const circleCanvas = document.getElementById('circleCanvas'), cCtx = circleCanvas.getContext('2d');
-        const energyCurveCanvas = document.getElementById('energyCurveCanvas'), eCtx = energyCurveCanvas.getContext('2d');
-        const phaseCanvas = document.getElementById('phaseCanvas'), pCtx = phaseCanvas.getContext('2d');
-
-        function resizeCanvases() {
-            const r = circleCanvas.parentElement.getBoundingClientRect();
-            if (r.width === 0 || r.height === 0) return;
-            [circleCanvas, energyCurveCanvas, phaseCanvas].forEach(cnv => { cnv.width = r.width; cnv.height = r.height; });
+        const unitY = new THREE.Vector3(0, 1, 0);
+        function positionStraightCord(mesh, startPos, endPos) {
+            const mid = new THREE.Vector3().addVectors(startPos, endPos).multiplyScalar(0.5);
+            const dir = new THREE.Vector3().subVectors(endPos, startPos);
+            const len = dir.length();
+            mesh.position.copy(mid);
+            mesh.scale.set(1, Math.max(0.01, len), 1);
+            const quat = new THREE.Quaternion().setFromUnitVectors(unitY, dir.clone().normalize());
+            mesh.quaternion.copy(quat);
         }
 
-        window.switchTab = function(tab) {
-            state.activeTab = tab;
-            ['tabBtnCircle', 'tabBtnEnergy', 'tabBtnPhase'].forEach(id => document.getElementById(id).className = "px-1.5 py-0.5 rounded text-[8.5px] font-tech text-slate-400");
-            circleCanvas.classList.add('hidden'); energyCurveCanvas.classList.add('hidden'); phaseCanvas.classList.add('hidden');
-            const sub = document.getElementById('tabSubLabel');
+        // VECTORS & MARKERS
+        const arrowVel = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 1, 0x10b981, 0.5, 0.25);
+        const arrowAcc = new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(), 1, 0xf43f5e, 0.5, 0.25);
+        const arrowWeight = new THREE.ArrowHelper(new THREE.Vector3(0, -1, 0), new THREE.Vector3(), 1, 0xf59e0b, 0.5, 0.25);
+        const arrowNormal = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 1, 0x00f2fe, 0.5, 0.25);
+        const arrowTension = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 1, 0xff007f, 0.5, 0.25);
+        
+        simGroup.add(arrowVel);
+        simGroup.add(arrowAcc);
+        simGroup.add(arrowWeight);
+        simGroup.add(arrowNormal);
+        simGroup.add(arrowTension);
 
-            if (tab === 'circle') {
-                document.getElementById('tabBtnCircle').className = "px-1.5 py-0.5 rounded text-[8.5px] font-tech font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40";
-                circleCanvas.classList.remove('hidden'); sub.innerText = "t = θ / ω";
-            } else if (tab === 'energy') {
-                document.getElementById('tabBtnEnergy').className = "px-1.5 py-0.5 rounded text-[8.5px] font-tech font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
-                energyCurveCanvas.classList.remove('hidden'); sub.innerText = "Ep & Ek vs x";
-            } else {
-                document.getElementById('tabBtnPhase').className = "px-1.5 py-0.5 rounded text-[8.5px] font-tech font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40";
-                phaseCanvas.classList.remove('hidden'); sub.innerText = "Phase Space (v - x)";
-            }
-        };
+        const markerMatO = new THREE.MeshBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.6 });
+        const markerMatLimit = new THREE.MeshBasicMaterial({ color: 0xff007f, transparent: true, opacity: 0.45 });
+        const markerMatNat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.6 });
+
+        const markerEq = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 5.0, 8), markerMatO);
+        const markerNat = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 5.0, 8), markerMatNat);
+        const markerLimitPos = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 4.0, 8), markerMatLimit);
+        const markerLimitNeg = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 4.0, 8), markerMatLimit);
+        simGroup.add(markerEq);
+        simGroup.add(markerNat);
+        simGroup.add(markerLimitPos);
+        simGroup.add(markerLimitNeg);
+
+        // 2D REFERENCE CIRCLE CANVAS
+        const circleCanvas = document.getElementById('circleCanvas');
+        const cCtx = circleCanvas.getContext('2d');
+
+        function resizeCircleCanvas() {
+            const rect = circleCanvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            circleCanvas.width = rect.width;
+            circleCanvas.height = rect.height;
+        }
 
         function drawReferenceCircle(amp, currX, theta) {
-            const w = circleCanvas.width, h = circleCanvas.height;
-            if (w === 0) return;
+            const w = circleCanvas.width;
+            const h = circleCanvas.height;
+            if (w === 0 || h === 0) return;
             cCtx.clearRect(0, 0, w, h);
-            const cx = w / 2, cy = h / 2, r = Math.min(cx, cy) - 8;
-            cCtx.beginPath(); cCtx.arc(cx, cy, r, 0, Math.PI * 2); cCtx.strokeStyle = 'rgba(0,242,254,0.4)'; cCtx.stroke();
-            const px = cx + (currX / amp) * r, py = cy - Math.sin(theta) * r;
-            cCtx.beginPath(); cCtx.moveTo(cx, cy); cCtx.lineTo(px, py); cCtx.strokeStyle = '#f59e0b'; cCtx.stroke();
-            cCtx.beginPath(); cCtx.arc(px, py, 3.5, 0, Math.PI * 2); cCtx.fillStyle = '#f59e0b'; cCtx.fill();
-            cCtx.beginPath(); cCtx.arc(px, cy, 4, 0, Math.PI * 2); cCtx.fillStyle = '#00f2fe'; cCtx.fill();
+
+            const cx = w / 2;
+            const cy = h / 2;
+            const r = Math.min(cx, cy) - 8;
+
+            cCtx.beginPath();
+            cCtx.arc(cx, cy, r, 0, Math.PI * 2);
+            cCtx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+            cCtx.lineWidth = 1.2;
+            cCtx.stroke();
+
+            cCtx.beginPath();
+            cCtx.moveTo(cx - r - 4, cy); cCtx.lineTo(cx + r + 4, cy);
+            cCtx.moveTo(cx, cy - r - 4); cCtx.lineTo(cx, cy + r + 4);
+            cCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+            cCtx.lineWidth = 1;
+            cCtx.stroke();
+
+            const px = cx + (currX / amp) * r;
+            const py = cy - Math.sin(theta) * r;
+
+            cCtx.beginPath();
+            cCtx.moveTo(cx, cy);
+            cCtx.lineTo(px, py);
+            cCtx.strokeStyle = '#f59e0b';
+            cCtx.lineWidth = 1.8;
+            cCtx.stroke();
+
+            cCtx.beginPath();
+            cCtx.arc(px, py, 3.5, 0, Math.PI * 2);
+            cCtx.fillStyle = '#f59e0b';
+            cCtx.fill();
+
+            cCtx.beginPath();
+            cCtx.arc(px, cy, 4, 0, Math.PI * 2);
+            cCtx.fillStyle = '#00f2fe';
+            cCtx.fill();
         }
 
-        function drawEnergyCurve(amp, currX) {
-            const w = energyCurveCanvas.width, h = energyCurveCanvas.height;
-            if (w === 0) return;
-            eCtx.clearRect(0, 0, w, h);
-            const padX = 18, padY = 8, gw = w - padX * 2, gh = h - padY * 2, midX = w / 2, baseY = h - padY;
-            eCtx.strokeStyle = 'rgba(255,255,255,0.15)'; eCtx.beginPath(); eCtx.moveTo(padX, baseY); eCtx.lineTo(w - padX, baseY); eCtx.stroke();
-            eCtx.strokeStyle = '#a855f7'; eCtx.beginPath(); eCtx.moveTo(padX, padY); eCtx.lineTo(w - padX, padY); eCtx.stroke();
+        // 2D LIVE ENERGY-DISPLACEMENT (E - x) PARABOLIC GRAPH
+        const energyCurveCanvas = document.getElementById('energyCurveCanvas');
+        const eCtx = energyCurveCanvas.getContext('2d');
 
-            eCtx.strokeStyle = '#00f2fe'; eCtx.beginPath();
-            for (let i = -gw / 2; i <= gw / 2; i += 2) {
-                const nx = i / (gw / 2), y = baseY - (nx * nx) * gh;
-                if (i === -gw / 2) eCtx.moveTo(midX + i, y); else eCtx.lineTo(midX + i, y);
+        function resizeEnergyCanvas() {
+            const rect = energyCurveCanvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            energyCurveCanvas.width = rect.width;
+            energyCurveCanvas.height = rect.height;
+        }
+
+        function drawEnergyCurve(amp, currX, ep, ek, etot) {
+            const w = energyCurveCanvas.width;
+            const h = energyCurveCanvas.height;
+            if (w === 0 || h === 0) return;
+            eCtx.clearRect(0, 0, w, h);
+
+            const padX = 18;
+            const padY = 8;
+            const graphW = w - padX * 2;
+            const graphH = h - padY * 2;
+            const midX = w / 2;
+            const baseLineY = h - padY;
+
+            eCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            eCtx.lineWidth = 1;
+            eCtx.beginPath();
+            eCtx.moveTo(padX, baseLineY);
+            eCtx.lineTo(w - padX, baseLineY);
+            eCtx.stroke();
+
+            eCtx.strokeStyle = '#a855f7';
+            eCtx.lineWidth = 1.5;
+            eCtx.beginPath();
+            eCtx.moveTo(padX, padY);
+            eCtx.lineTo(w - padX, padY);
+            eCtx.stroke();
+
+            eCtx.strokeStyle = '#00f2fe';
+            eCtx.lineWidth = 1.5;
+            eCtx.beginPath();
+            for (let i = -graphW / 2; i <= graphW / 2; i += 2) {
+                const normX = i / (graphW / 2);
+                const valY = baseLineY - (normX * normX) * graphH;
+                if (i === -graphW / 2) eCtx.moveTo(midX + i, valY);
+                else eCtx.lineTo(midX + i, valY);
             }
             eCtx.stroke();
 
-            const cnx = Math.max(-1, Math.min(1, currX / amp));
-            eCtx.beginPath(); eCtx.arc(midX + cnx * (gw / 2), baseY - (cnx * cnx) * gh, 3.5, 0, Math.PI * 2); eCtx.fillStyle = '#00f2fe'; eCtx.fill();
+            eCtx.strokeStyle = '#10b981';
+            eCtx.lineWidth = 1.5;
+            eCtx.beginPath();
+            for (let i = -graphW / 2; i <= graphW / 2; i += 2) {
+                const normX = i / (graphW / 2);
+                const valY = padY + (normX * normX) * graphH;
+                if (i === -graphW / 2) eCtx.moveTo(midX + i, valY);
+                else eCtx.lineTo(midX + i, valY);
+            }
+            eCtx.stroke();
+
+            const currNormX = Math.max(-1, Math.min(1, currX / amp));
+            const ptX = midX + currNormX * (graphW / 2);
+            const ptEpY = baseLineY - (currNormX * currNormX) * graphH;
+            const ptEkY = padY + (currNormX * currNormX) * graphH;
+
+            eCtx.beginPath();
+            eCtx.arc(ptX, ptEpY, 3.5, 0, Math.PI * 2);
+            eCtx.fillStyle = '#00f2fe';
+            eCtx.fill();
+
+            eCtx.beginPath();
+            eCtx.arc(ptX, ptEkY, 3.5, 0, Math.PI * 2);
+            eCtx.fillStyle = '#10b981';
+            eCtx.fill();
         }
 
-        function drawPhasePortrait(amp, currX, currV) {
-            const w = phaseCanvas.width, h = phaseCanvas.height;
-            if (w === 0) return;
-            pCtx.clearRect(0, 0, w, h);
-            const cx = w / 2, cy = h / 2, rx = Math.min(cx, cy) - 10, ry = rx * 0.85;
-            pCtx.strokeStyle = 'rgba(255,255,255,0.15)'; pCtx.beginPath(); pCtx.moveTo(8, cy); pCtx.lineTo(w - 8, cy); pCtx.moveTo(cx, 8); pCtx.lineTo(cx, h - 8); pCtx.stroke();
-            pCtx.strokeStyle = 'rgba(168,85,247,0.45)'; pCtx.beginPath(); pCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); pCtx.stroke();
-            const vmax = state.omega * state.amplitude || 1;
-            pCtx.beginPath(); pCtx.arc(cx + (currX / amp) * rx, cy - (currV / vmax) * ry, 3.5, 0, Math.PI * 2);
-            pCtx.fillStyle = state.isSlack ? '#ff007f' : '#00f2fe'; pCtx.fill();
-        }
-
-        // HAPTIC
-        let lastHaptic = 0;
+        // HAPTIC FEEDBACK
+        let lastHapticTime = 0;
         function triggerHaptic(type) {
-            if (!state.hapticEnabled || !navigator.vibrate) return;
+            if (!state.hapticEnabled || !window.navigator || !window.navigator.vibrate) return;
             const now = Date.now();
-            if (now - lastHaptic < 250) return;
-            if (type === 'slack') { navigator.vibrate([20, 30, 20]); lastHaptic = now; }
-            else { navigator.vibrate(15); lastHaptic = now; }
+            if (now - lastHapticTime < 280) return;
+
+            if (type === 'slack') {
+                window.navigator.vibrate([25, 40, 25]);
+                lastHapticTime = now;
+            } else if (type === 'extreme') {
+                window.navigator.vibrate(18);
+                lastHapticTime = now;
+            }
         }
 
-        // PHYSICS
+        // SWIPE DOWN TO DISMISS GESTURES
+        function setupDrawerGestures() {
+            const drawers = [document.getElementById('controlsPanel'), document.getElementById('analyticsPanel')];
+            drawers.forEach(drawer => {
+                let startY = 0;
+                let currentY = 0;
+                let isDragging = false;
+
+                drawer.addEventListener('touchstart', (e) => {
+                    if (window.innerWidth > 850) return;
+                    if (drawer.scrollTop <= 2 || e.target.closest('.mobile-drawer-header')) {
+                        startY = e.touches[0].clientY;
+                        isDragging = true;
+                    }
+                }, { passive: true });
+
+                drawer.addEventListener('touchmove', (e) => {
+                    if (!isDragging || window.innerWidth > 850) return;
+                    currentY = e.touches[0].clientY;
+                    const diffY = currentY - startY;
+                    if (diffY > 0) {
+                        drawer.style.transform = `translateY(${diffY}px)`;
+                    }
+                }, { passive: true });
+
+                drawer.addEventListener('touchend', () => {
+                    if (!isDragging || window.innerWidth > 850) return;
+                    isDragging = false;
+                    const diffY = currentY - startY;
+                    drawer.style.transform = '';
+                    if (diffY > 90) {
+                        closeActiveDrawer();
+                    }
+                });
+            });
+        }
+
+        // SET MODE FUNCTION (GPE is maintained visible across all modes)
         function setMode(modeId) {
             state.mode = parseInt(modeId);
-            state.time = 0; state.x = state.amplitude; state.v = 0; state.f = 0; state.isSlack = false;
-            document.getElementById('wrapperAngle').classList.add('hidden');
-            document.getElementById('wrapperL').classList.add('hidden');
-            document.getElementById('wrapperK').classList.remove('hidden');
+            state.time = 0;
+            state.x = state.amplitude;
+            state.v = 0;
+            state.f = 0;
+            state.isSlack = false;
 
-            trackMesh.visible = false; ceilingClamp.visible = false; wallLeft.visible = false; wallRight.visible = false;
-            wedgeGroup.visible = false; trolleyGroup.visible = false; massSphere.visible = true; cordMesh.visible = false; slackLine.visible = false;
-            if (springMesh1) springMesh1.visible = false; if (springMesh2) springMesh2.visible = false;
+            const wrapperAngle = document.getElementById('wrapperAngle');
+            const wrapperL = document.getElementById('wrapperL');
+            const wrapperK = document.getElementById('wrapperK');
+            const titleK = document.getElementById('titleK');
 
-            const hd = document.getElementById('modeHeading'), sb = document.getElementById('modeSubText');
+            wrapperAngle.classList.add('hidden');
+            wrapperL.classList.add('hidden');
+            wrapperK.classList.remove('hidden');
+            titleK.innerHTML = 'දුනු නියතය (<span class="font-tech text-amber-400 font-bold">k</span>)';
+
+            horizontalTrack.visible = false;
+            ceilingClamp.visible = false;
+            wallLeft.visible = false;
+            wallRight.visible = false;
+            wedgeGroup.visible = false;
+            trolleyGroup.visible = false;
+            massSphere.visible = true;
+            cordMesh.visible = false;
+            slackLine.visible = false;
+            arrowWeight.visible = false;
+            arrowNormal.visible = false;
+            arrowTension.visible = false;
+
+            if (springMesh1) springMesh1.visible = false;
+            if (springMesh2) springMesh2.visible = false;
+
+            const heading = document.getElementById('modeHeading');
+            const sub = document.getElementById('modeSubText');
+
             if (state.mode === 1) {
-                hd.innerText = "1. තිරස් Air-Track"; sb.innerText = "F = -kx මඟින් සරල අනුවර්තී චලිතය ඇතිවීම.";
-                trackMesh.visible = true; wallLeft.visible = true; wallLeft.position.set(-11, 0, 0);
+                heading.innerText = "1. තිරස් සුමට Air-Track පද්ධතිය";
+                sub.innerText = "F = -kx මඟින් ẍ = -ω²x සරල අනුවර්තී චලිතය ඇතිවීම. ගුරුත්ව සංරචක නොමැත.";
+                horizontalTrack.visible = true;
+                wallLeft.visible = true;
+                wallLeft.position.set(-11, 0, 0);
+
+                markerEq.rotation.set(0, 0, 0);
+                markerEq.position.set(0, 0, 0);
+                markerNat.visible = false;
+
             } else if (state.mode === 2) {
-                hd.innerText = "2. සිරස් තන්තුව (Slack)"; sb.innerText = "a > e විට ස්වාභාවික මට්ටම පසුකරද්දී තන්තුව ලිහිල් වේ.";
-                ceilingClamp.visible = true; cordMesh.visible = true;
+                heading.innerText = "2. සිරස් තන්තුව සහ ලිහිල් වීම (Slack String Exam Model)";
+                sub.innerText = "a > e විට ස්වාභාවික මට්ටම (x = -e) පසුකරද්දී තන්තුවේ ආතතිය T=0 වී ගුරුත්වය යටතේ නිදහස් ප්‍රක්ෂිප්තයක් වේ!";
+                titleK.innerHTML = 'ප්‍රත්‍යාස්ථ නියතය (<span class="font-tech text-amber-400 font-bold">λ/l</span>)';
+
+                ceilingClamp.visible = true;
+                cordMesh.visible = true;
+
+                markerEq.rotation.set(0, 0, Math.PI / 2);
+                markerNat.visible = true;
+                markerNat.rotation.set(0, 0, Math.PI / 2);
+
             } else if (state.mode === 3) {
-                hd.innerText = "3. ආනත තලය මත චලිතය"; sb.innerText = "ආනත තලය ඔස්සේ ගුරුත්ව සංරචකය mg sin(α) වේ.";
-                document.getElementById('wrapperAngle').classList.remove('hidden');
-                wedgeGroup.visible = true; trolleyGroup.visible = true; massSphere.visible = false;
-                buildIncline(state.inclineAngle);
+                heading.innerText = "3. ආනත තලය මත චලිතය (Inclined Plane with Trolley)";
+                sub.innerText = "ආනත තලය ඔස්සේ බරෙහි සංරචකය mg sin(α) වේ. තුලිත දිගුව e = (mg sin α)/k. බර, අභිලම්භය හා ආතතිය දෛශික 3D වලින්!";
+                wrapperAngle.classList.remove('hidden');
+
+                wedgeGroup.visible = true;
+                trolleyGroup.visible = true;
+                massSphere.visible = false;
+                arrowWeight.visible = true;
+                arrowNormal.visible = true;
+                arrowTension.visible = true;
+
+                buildRealisticInclineRamp(state.inclineAngle);
+                markerNat.visible = true;
+
             } else if (state.mode === 4) {
-                hd.innerText = "4. දෙකෙළවර තන්තු පද්ධතිය"; sb.innerText = "F = -2kx, ω = √(2k/m).";
-                trackMesh.visible = true; wallLeft.visible = true; wallRight.visible = true;
-                wallLeft.position.set(-11, 0, 0); wallRight.position.set(11, 0, 0);
-            } else {
-                hd.innerText = "5. සරල ලෝලකය"; sb.innerText = "කෝණික සරල අනුවර්තී චලිතය: θ̈ = -(g/L)θ.";
-                document.getElementById('wrapperK').classList.add('hidden'); document.getElementById('wrapperL').classList.remove('hidden');
-                ceilingClamp.visible = true; cordMesh.visible = true;
+                heading.innerText = "4. දෙකෙළවර සවි කළ තන්තු පද්ධතිය (Double Opposing Springs)";
+                sub.innerText = "දෙපසින් ආතතීන් ක්‍රියාකිරීම නිසා සම්ප්‍රයුක්ත ප්‍රතිස්ථාපන බලය F = -2kx, ω = √(2k/m).";
+                horizontalTrack.visible = true;
+                wallLeft.visible = true;
+                wallRight.visible = true;
+                wallLeft.position.set(-11, 0, 0);
+                wallRight.position.set(11, 0, 0);
+
+                markerEq.rotation.set(0, 0, 0);
+                markerEq.position.set(0, 0, 0);
+                markerNat.visible = false;
+
+            } else if (state.mode === 5) {
+                heading.innerText = "5. සරල ලෝලකය (Simple Pendulum & Small Angles)";
+                sub.innerText = "කෝණික සරල අනුවර්තී චලිතය: θ̈ = -(g/L) sin θ ≈ -(g/L)θ (කුඩා කෝණ සඳහා).";
+                wrapperK.classList.add('hidden');
+                wrapperL.classList.remove('hidden');
+
+                ceilingClamp.visible = true;
+                cordMesh.visible = true;
+                markerNat.visible = false;
             }
+
             recalcParams();
-            updateAiCopilot();
         }
 
         function recalcParams() {
-            const m = state.mass, k = state.k, g = state.g;
-            if (state.mode === 1) { state.omega = Math.sqrt(k / m); state.eqExtension = 0; }
-            else if (state.mode === 2) { state.eqExtension = (m * g) / k; state.omega = Math.sqrt(k / m); }
-            else if (state.mode === 3) { state.eqExtension = (m * g * Math.sin(state.inclineAngle)) / k; state.omega = Math.sqrt(k / m); }
-            else if (state.mode === 4) { state.omega = Math.sqrt((2 * k) / m); state.eqExtension = 0; }
-            else { state.omega = Math.sqrt(g / state.pendulumLength); state.eqExtension = 0; }
+            const m = state.mass;
+            const k = state.k;
+            const g = state.g;
+
+            if (state.mode === 1) {
+                state.omega = Math.sqrt(k / m);
+                state.eqExtension = 0;
+            } else if (state.mode === 2) {
+                state.eqExtension = (m * g) / k;
+                state.omega = Math.sqrt(k / m);
+            } else if (state.mode === 3) {
+                state.eqExtension = (m * g * Math.sin(state.inclineAngle)) / k;
+                state.omega = Math.sqrt(k / m);
+            } else if (state.mode === 4) {
+                state.omega = Math.sqrt((2 * k) / m);
+                state.eqExtension = 0;
+            } else if (state.mode === 5) {
+                state.omega = Math.sqrt(g / state.pendulumLength);
+                state.eqExtension = 0;
+            }
 
             state.period = (2 * Math.PI) / state.omega;
             state.freq = 1 / state.period;
+
             document.getElementById('statOmega').innerText = state.omega.toFixed(2) + " r/s";
             document.getElementById('statPeriod').innerText = state.period.toFixed(2) + " s";
             document.getElementById('statFreq').innerText = state.freq.toFixed(2) + " Hz";
             document.getElementById('statE').innerText = state.eqExtension.toFixed(2) + " m";
         }
 
+        // PHYSICAL INTEGRATION ENGINE
         function updatePhysics(dt) {
-            const sub = 8, sdt = (dt * state.speedMultiplier) / sub, prevSlack = state.isSlack;
-            for (let i = 0; i < sub; i++) {
-                state.time += sdt;
+            const subSteps = 8;
+            const stepDt = (dt * state.speedMultiplier) / subSteps;
+            const prevSlack = state.isSlack;
+
+            for (let i = 0; i < subSteps; i++) {
+                state.time += stepDt;
+
                 if (state.mode === 1) {
                     const acc = - (state.k / state.mass) * state.x;
-                    state.v += acc * sdt; state.x += state.v * sdt; state.f = acc; state.isSlack = false;
+                    state.v += acc * stepDt;
+                    state.x += state.v * stepDt;
+                    state.f = acc;
+                    state.isSlack = false;
+
                 } else if (state.mode === 2) {
                     const ext = state.eqExtension + state.x;
                     if (ext >= 0) {
                         const acc = - (state.k / state.mass) * state.x;
-                        state.v += acc * sdt; state.x += state.v * sdt; state.f = acc; state.isSlack = false;
+                        state.v += acc * stepDt;
+                        state.x += state.v * stepDt;
+                        state.f = acc;
+                        state.isSlack = false;
                     } else {
                         const acc = state.g;
-                        state.v += acc * sdt; state.x += state.v * sdt; state.f = acc; state.isSlack = true;
+                        state.v += acc * stepDt;
+                        state.x += state.v * stepDt;
+                        state.f = acc;
+                        state.isSlack = true;
                     }
+
                 } else if (state.mode === 3) {
                     const ext = state.eqExtension + state.x;
-                    const acc = ext >= 0 ? - (state.k / state.mass) * state.x : state.g * Math.sin(state.inclineAngle);
-                    state.v += acc * sdt; state.x += state.v * sdt; state.f = acc; state.isSlack = ext < 0;
+                    if (ext >= 0) {
+                        const acc = - (state.k / state.mass) * state.x;
+                        state.v += acc * stepDt;
+                        state.x += state.v * stepDt;
+                        state.f = acc;
+                        state.isSlack = false;
+                    } else {
+                        const acc = state.g * Math.sin(state.inclineAngle);
+                        state.v += acc * stepDt;
+                        state.x += state.v * stepDt;
+                        state.f = acc;
+                        state.isSlack = true;
+                    }
+
                 } else if (state.mode === 4) {
                     const acc = - (2 * state.k / state.mass) * state.x;
-                    state.v += acc * sdt; state.x += state.v * sdt; state.f = acc; state.isSlack = false;
-                } else {
-                    const L = state.pendulumLength, theta = state.x / L, aAcc = - (state.g / L) * Math.sin(theta);
-                    state.v += (aAcc * L) * sdt; state.x += state.v * sdt; state.f = aAcc * L; state.isSlack = false;
+                    state.v += acc * stepDt;
+                    state.x += state.v * stepDt;
+                    state.f = acc;
+                    state.isSlack = false;
+
+                } else if (state.mode === 5) {
+                    const L = state.pendulumLength;
+                    const theta = state.x / L;
+                    const alphaAcc = - (state.g / L) * Math.sin(theta);
+                    state.v += (alphaAcc * L) * stepDt;
+                    state.x += state.v * stepDt;
+                    state.f = alphaAcc * L;
+                    state.isSlack = false;
                 }
             }
-            if (state.isSlack && !prevSlack) triggerHaptic('slack');
-            else if (Math.abs(Math.abs(state.x) - state.amplitude) < 0.08) triggerHaptic('extreme');
 
-            state.ke = 0.5 * state.mass * state.v * state.v;
-            if (state.mode === 1 || state.mode === 4) { state.epe = 0.5 * state.k * state.x * state.x * (state.mode === 4 ? 2 : 1); state.gpe = 0; }
-            else if (state.mode === 2 || state.mode === 3) {
+            if (state.isSlack && !prevSlack) {
+                triggerHaptic('slack');
+            } else if (Math.abs(Math.abs(state.x) - state.amplitude) < 0.08) {
+                triggerHaptic('extreme');
+            }
+
+            const m = state.mass;
+            const v = state.v;
+            state.ke = 0.5 * m * v * v;
+
+            if (state.mode === 1) {
+                state.epe = 0.5 * state.k * state.x * state.x;
+                state.gpe = 0;
+            } else if (state.mode === 2) {
                 const ext = state.eqExtension + state.x;
                 state.epe = ext > 0 ? 0.5 * state.k * ext * ext : 0;
-                state.gpe = - state.mass * state.g * (state.mode === 3 ? Math.sin(state.inclineAngle) : 1) * state.x;
-            } else {
-                state.epe = 0; state.gpe = state.mass * state.g * state.pendulumLength * (1 - Math.cos(state.x / state.pendulumLength));
+                state.gpe = - m * state.g * state.x;
+            } else if (state.mode === 3) {
+                const ext = state.eqExtension + state.x;
+                state.epe = ext > 0 ? 0.5 * state.k * ext * ext : 0;
+                state.gpe = - m * state.g * Math.sin(state.inclineAngle) * state.x;
+            } else if (state.mode === 4) {
+                state.epe = state.k * state.x * state.x;
+                state.gpe = 0;
+            } else if (state.mode === 5) {
+                const L = state.pendulumLength;
+                const theta = state.x / L;
+                state.epe = 0;
+                state.gpe = m * state.g * L * (1 - Math.cos(theta));
             }
+
             state.totalEnergy = state.ke + state.epe + (state.mode === 2 || state.mode === 3 ? (state.gpe + 120) : state.gpe);
         }
 
-        function render3D() {
-            const x = state.x, v = state.v, f = state.f;
+        // 3D RENDERING
+        function renderSim3D() {
+            const x = state.x;
+            const v = state.v;
+            const f = state.f;
+
             const badge = document.getElementById('motionStatusBadge');
             if (state.isSlack) {
-                badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-neonPink border border-pink-500/40 animate-pulse";
-                badge.innerText = "🔥 තන්තුව ලිහිල් (SLACK)";
+                badge.className = "text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-neonPink border border-pink-500/40 animate-pulse";
+                badge.innerText = "🔥 තන්තුව ලිහිල් (SLACK - T = 0)";
                 massSphere.material = bodyMatSlack;
             } else {
-                badge.className = "text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
-                badge.innerText = "⚡ තන්තුව තදයි (TAUT)";
+                badge.className = "text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+                badge.innerText = "⚡ තන්තුව තදයි (TAUT - SHM)";
                 massSphere.material = bodyMatTaut;
             }
 
-            let pPos = new THREE.Vector3();
             if (state.mode === 1) {
-                massGroup.position.set(x, 0, 0); pPos.set(x, 0, 0);
+                massGroup.position.set(x, 0, 0);
                 updateSpring1(new THREE.Vector3(-10.3, 0, 0), new THREE.Vector3(x - 1.05, 0, 0));
-                arrowVel.position.set(x, 1.6, 0); arrowVel.setDirection(new THREE.Vector3(v >= 0 ? 1 : -1, 0, 0)); arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35));
-                arrowAcc.position.set(x, 2.4, 0); arrowAcc.setDirection(new THREE.Vector3(f >= 0 ? 1 : -1, 0, 0)); arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12));
+
+                markerLimitPos.position.set(state.amplitude, 0, 0);
+                markerLimitNeg.position.set(-state.amplitude, 0, 0);
+
+                arrowVel.position.set(x, 1.6, 0);
+                arrowVel.setDirection(new THREE.Vector3(v >= 0 ? 1 : -1, 0, 0));
+                arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35), 0.45, 0.2);
+
+                arrowAcc.position.set(x, 2.4, 0);
+                arrowAcc.setDirection(new THREE.Vector3(f >= 0 ? 1 : -1, 0, 0));
+                arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12), 0.45, 0.2);
+
             } else if (state.mode === 2) {
-                const yCeil = 8.0, yEq = yCeil - state.naturalLength - state.eqExtension, yBall = yEq - x;
-                massGroup.position.set(0, yBall, 0); pPos.set(0, yBall, 0);
+                const yCeil = 8.0;
+                const yEq = yCeil - state.naturalLength - state.eqExtension;
+                const yBall = yEq - x;
+
+                massGroup.position.set(0, yBall, 0);
+
+                markerEq.position.set(0, yEq, 0);
+                markerNat.position.set(0, yCeil - state.naturalLength, 0);
+                markerLimitPos.position.set(0, yEq - state.amplitude, 0);
+                markerLimitNeg.position.set(0, yEq + state.amplitude, 0);
+
+                const topPos = new THREE.Vector3(0, yCeil, 0);
+                const botPos = new THREE.Vector3(0, yBall + 1.05, 0);
+
                 if (state.isSlack) {
-                    cordMesh.visible = false; slackLine.visible = true;
-                    const arr = slackGeo.attributes.position.array, sD = Math.max(0.2, (- (state.eqExtension + state.x)) * 0.85);
+                    cordMesh.visible = false;
+                    slackLine.visible = true;
+
+                    const posArray = slackGeo.attributes.position.array;
+                    const slackDepth = Math.max(0.2, (- (state.eqExtension + state.x)) * 0.85);
+
                     for (let i = 0; i <= SLACK_SEGS; i++) {
                         const t = i / SLACK_SEGS;
-                        arr[i * 3] = Math.sin(t * Math.PI) * sD * Math.sin(state.time * 5);
-                        arr[i * 3 + 1] = yCeil - t * (yCeil - (yBall + 1.05)) - Math.sin(t * Math.PI) * sD * 0.4;
-                        arr[i * 3 + 2] = Math.sin(t * Math.PI) * sD;
+                        const px = Math.sin(t * Math.PI) * slackDepth * Math.sin(state.time * 5);
+                        const py = yCeil - t * (yCeil - (yBall + 1.05)) - Math.sin(t * Math.PI) * slackDepth * 0.4;
+                        const pz = Math.sin(t * Math.PI) * slackDepth;
+                        posArray[i * 3] = px;
+                        posArray[i * 3 + 1] = py;
+                        posArray[i * 3 + 2] = pz;
                     }
                     slackGeo.attributes.position.needsUpdate = true;
+
                 } else {
-                    slackLine.visible = false; cordMesh.visible = true;
-                    cordMesh.position.set(0, (yCeil + yBall + 1.05) / 2, 0);
-                    cordMesh.scale.set(1, Math.max(0.01, yCeil - (yBall + 1.05)), 1);
+                    slackLine.visible = false;
+                    cordMesh.visible = true;
+                    positionStraightCord(cordMesh, topPos, botPos);
                 }
-                arrowVel.position.set(1.5, yBall, 0); arrowVel.setDirection(new THREE.Vector3(0, -v >= 0 ? 1 : -1, 0)); arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35));
-                arrowAcc.position.set(2.4, yBall, 0); arrowAcc.setDirection(new THREE.Vector3(0, -f >= 0 ? 1 : -1, 0)); arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12));
+
+                arrowVel.position.set(1.5, yBall, 0);
+                arrowVel.setDirection(new THREE.Vector3(0, -v >= 0 ? 1 : -1, 0));
+                arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35), 0.45, 0.2);
+
+                arrowAcc.position.set(2.4, yBall, 0);
+                arrowAcc.setDirection(new THREE.Vector3(0, -f >= 0 ? 1 : -1, 0));
+                arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12), 0.45, 0.2);
+
             } else if (state.mode === 3) {
-                const a = state.inclineAngle, cosA = Math.cos(a), sinA = Math.sin(a);
-                const b = 22 * cosA, h = 22 * sinA, top = new THREE.Vector3(-b / 2 + 0.5, -1.5 + h - 0.2, 0);
-                const dist = state.naturalLength + state.eqExtension + x;
-                const cx = top.x + dist * cosA, cy = top.y - dist * sinA;
-                trolleyGroup.position.set(cx, cy + 0.35, 0); trolleyGroup.rotation.z = -a; pPos.set(cx, cy + 0.35, 0);
-                updateSpring1(top, new THREE.Vector3(cx - cosA * 1.2, cy + sinA * 1.2 + 0.35, 0));
-                arrowVel.position.set(cx, cy + 1.2, 0); arrowVel.setDirection(new THREE.Vector3(v * cosA, -v * sinA, 0).normalize()); arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35));
-                arrowAcc.position.set(cx, cy + 1.8, 0); arrowAcc.setDirection(new THREE.Vector3(f * cosA, -f * sinA, 0).normalize()); arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12));
+                const alpha = state.inclineAngle;
+                const cosA = Math.cos(alpha);
+                const sinA = Math.sin(alpha);
+
+                const baseLen = 22 * cosA;
+                const h = 22 * sinA;
+                const topAnchor = new THREE.Vector3(-baseLen / 2 + 0.5, -1.5 + h - 0.2, 0);
+
+                const distAlong = state.naturalLength + state.eqExtension + x;
+                const cartPosX = topAnchor.x + distAlong * cosA;
+                const cartPosY = topAnchor.y - distAlong * sinA;
+
+                trolleyGroup.position.set(cartPosX, cartPosY + 0.35, 0);
+                trolleyGroup.rotation.z = -alpha;
+
+                updateSpring1(topAnchor, new THREE.Vector3(cartPosX - cosA * 1.2, cartPosY + sinA * 1.2 + 0.35, 0));
+
+                markerNat.rotation.z = -alpha;
+                markerNat.position.set(topAnchor.x + state.naturalLength * cosA, topAnchor.y - state.naturalLength * sinA, 0);
+                markerEq.rotation.z = -alpha;
+                markerEq.position.set(topAnchor.x + (state.naturalLength + state.eqExtension) * cosA, topAnchor.y - (state.naturalLength + state.eqExtension) * sinA, 0);
+
+                arrowVel.position.set(cartPosX, cartPosY + 1.2, 0);
+                arrowVel.setDirection(new THREE.Vector3(v * cosA, -v * sinA, 0).normalize());
+                arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35), 0.45, 0.2);
+
+                arrowAcc.position.set(cartPosX, cartPosY + 1.8, 0);
+                arrowAcc.setDirection(new THREE.Vector3(f * cosA, -f * sinA, 0).normalize());
+                arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12), 0.45, 0.2);
+
+                arrowWeight.position.set(cartPosX, cartPosY + 0.35, 1.2);
+                arrowWeight.setDirection(new THREE.Vector3(0, -1, 0));
+                arrowWeight.setLength(1.8, 0.4, 0.2);
+
+                arrowNormal.position.set(cartPosX, cartPosY + 0.35, 1.2);
+                arrowNormal.setDirection(new THREE.Vector3(sinA, cosA, 0).normalize());
+                arrowNormal.setLength(1.8 * Math.cos(alpha), 0.4, 0.2);
+
+                const ext = state.eqExtension + x;
+                if (ext > 0) {
+                    arrowTension.visible = true;
+                    arrowTension.position.set(cartPosX, cartPosY + 0.35, -1.2);
+                    arrowTension.setDirection(new THREE.Vector3(-cosA, sinA, 0).normalize());
+                    arrowTension.setLength(Math.max(0.3, (ext / (state.eqExtension || 1)) * 1.5), 0.4, 0.2);
+                } else {
+                    arrowTension.visible = false;
+                }
+
             } else if (state.mode === 4) {
-                massGroup.position.set(x, 0, 0); pPos.set(x, 0, 0);
+                massGroup.position.set(x, 0, 0);
                 updateSpring1(new THREE.Vector3(-10.3, 0, 0), new THREE.Vector3(x - 1.05, 0, 0));
                 updateSpring2(new THREE.Vector3(x + 1.05, 0, 0), new THREE.Vector3(10.3, 0, 0));
-                arrowVel.position.set(x, 1.6, 0); arrowVel.setDirection(new THREE.Vector3(v >= 0 ? 1 : -1, 0, 0)); arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35));
-                arrowAcc.position.set(x, 2.4, 0); arrowAcc.setDirection(new THREE.Vector3(f >= 0 ? 1 : -1, 0, 0)); arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12));
-            } else {
-                const L = state.pendulumLength, theta = state.x / L;
-                const bob = new THREE.Vector3(L * Math.sin(theta), 8.0 - L * Math.cos(theta), 0);
-                massGroup.position.copy(bob); pPos.copy(bob);
-                cordMesh.position.set(bob.x / 2, (8.0 + bob.y) / 2, 0);
-                cordMesh.scale.set(1, L, 1);
-                cordMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(-bob.x, 8.0 - bob.y, 0).normalize());
-                arrowVel.position.copy(bob).add(new THREE.Vector3(0, 1.2, 0)); arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35));
-                arrowAcc.position.copy(bob).add(new THREE.Vector3(0, 1.8, 0)); arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12));
+
+                markerLimitPos.position.set(state.amplitude, 0, 0);
+                markerLimitNeg.position.set(-state.amplitude, 0, 0);
+
+                arrowVel.position.set(x, 1.6, 0);
+                arrowVel.setDirection(new THREE.Vector3(v >= 0 ? 1 : -1, 0, 0));
+                arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35), 0.45, 0.2);
+
+                arrowAcc.position.set(x, 2.4, 0);
+                arrowAcc.setDirection(new THREE.Vector3(f >= 0 ? 1 : -1, 0, 0));
+                arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12), 0.45, 0.2);
+
+            } else if (state.mode === 5) {
+                const L = state.pendulumLength;
+                const theta = state.x / L;
+                const pivot = new THREE.Vector3(0, 8.0, 0);
+                const bobPos = new THREE.Vector3(pivot.x + L * Math.sin(theta), pivot.y - L * Math.cos(theta), 0);
+
+                massGroup.position.copy(bobPos);
+                positionStraightCord(cordMesh, pivot, bobPos);
+
+                arrowVel.position.copy(bobPos).add(new THREE.Vector3(0, 1.3, 0));
+                arrowVel.setDirection(new THREE.Vector3(Math.cos(theta) * (v >= 0 ? 1 : -1), Math.sin(theta) * (v >= 0 ? 1 : -1), 0));
+                arrowVel.setLength(Math.max(0.1, Math.abs(v) * 0.35), 0.45, 0.2);
+
+                arrowAcc.position.copy(bobPos).add(new THREE.Vector3(0, 2.1, 0));
+                arrowAcc.setDirection(new THREE.Vector3(Math.cos(theta) * (f >= 0 ? 1 : -1), Math.sin(theta) * (f >= 0 ? 1 : -1), 0));
+                arrowAcc.setLength(Math.max(0.1, Math.abs(f) * 0.12), 0.45, 0.2);
             }
-            updateTrail(pPos);
         }
 
+        // HUD & LIVE CANVASES (Updates bars & numbers cleanly)
         function renderHUD() {
             document.getElementById('statX').innerText = state.x.toFixed(2) + " m";
             document.getElementById('statV').innerText = state.v.toFixed(2) + " ms⁻¹";
             document.getElementById('statF').innerText = state.f.toFixed(2) + " ms⁻²";
 
             const maxE = Math.max(0.1, state.totalEnergy, state.ke + state.epe + Math.abs(state.gpe));
-            document.getElementById('barKE').style.width = Math.min(100, (state.ke / maxE) * 100) + "%";
-            document.getElementById('barEPE').style.width = Math.min(100, (state.epe / maxE) * 100) + "%";
-            document.getElementById('barGPE').style.width = Math.min(100, (Math.abs(state.gpe) / maxE) * 100) + "%";
+            const pKE = Math.min(100, Math.max(0, (state.ke / maxE) * 100));
+            const pEPE = Math.min(100, Math.max(0, (state.epe / maxE) * 100));
+            const pGPE = Math.min(100, Math.max(0, (Math.abs(state.gpe) / maxE) * 100));
+
+            document.getElementById('barKE').style.width = pKE + "%";
+            document.getElementById('barEPE').style.width = pEPE + "%";
+            document.getElementById('barGPE').style.width = pGPE + "%";
 
             document.getElementById('numKE').innerText = state.ke.toFixed(1) + " J";
             document.getElementById('numEPE').innerText = state.epe.toFixed(1) + " J";
             document.getElementById('numGPE').innerText = state.gpe.toFixed(1) + " J";
             document.getElementById('labelTotEnergy').innerText = `E_tot ≈ ${state.totalEnergy.toFixed(1)} J`;
 
-            const th = state.omega * state.time;
-            if (state.activeTab === 'circle') drawReferenceCircle(state.amplitude, state.x, th);
-            else if (state.activeTab === 'energy') drawEnergyCurve(state.amplitude, state.x);
-            else drawPhasePortrait(state.amplitude, state.x, state.v);
-            updateAudio();
+            const theta = state.omega * state.time;
+            drawReferenceCircle(state.amplitude, state.x, theta);
+            drawEnergyCurve(state.amplitude, state.x, state.epe, state.ke, state.totalEnergy);
         }
 
-        // AI LOGIC
-        function updateAiCopilot() {
-            const diag = document.getElementById('aiDiagnosisText'), pill = document.getElementById('aiStatusPill');
-            if (state.mode === 2 && state.amplitude > state.eqExtension) {
-                pill.className = "text-[9px] font-tech font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-neonPink";
-                pill.innerText = "Slack String";
-                const v_slack = state.omega * Math.sqrt(Math.max(0, state.amplitude ** 2 - state.eqExtension ** 2));
-                const t_free = (2 * v_slack) / state.g;
-                diag.innerHTML = `⚠️ විස්තාරය a (${state.amplitude.toFixed(1)}m) > e (${state.eqExtension.toFixed(2)}m) බැවින් තන්තුව ලිහිල් වේ!<br>• ලිහිල් වන මොහොතේ ප්‍රවේගය: ${v_slack.toFixed(2)} ms⁻¹<br>• ගුරුත්වය යටතේ නිදහස් ප්‍රක්ෂිප්ත කාලය: ${t_free.toFixed(2)} s`;
-            } else {
-                pill.className = "text-[9px] font-tech font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300";
-                pill.innerText = "Pure SHM";
-                diag.innerHTML = `✓ පූර්ණ සරල අනුවර්තී චලිතයකි.<br>• ආවර්ත කාලය T = ${state.period.toFixed(2)}s (Isochronous)<br>• Vmax = ${(state.omega * state.amplitude).toFixed(2)} ms⁻¹ | Fmax = ${(state.omega * state.omega * state.amplitude).toFixed(2)} ms⁻²`;
-            }
-        }
-
-        function solveStep() {
-            const val = parseFloat(document.getElementById('aiInputX').value);
-            const out = document.getElementById('aiSolverOutput'), a = state.amplitude, w = state.omega;
-            if (isNaN(val) || Math.abs(val) > a) { out.innerHTML = `<span class="text-rose-400">❌ විස්ථාපනය විස්තාරය (${a.toFixed(1)}m) තුළ විය යුතුය!</span>`; return; }
-            const v = w * Math.sqrt(Math.max(0, a * a - val * val));
-            out.innerHTML = `v² = ω²(a² - x²) ➔ |v| = ${v.toFixed(2)} ms⁻¹<br>f = -ω²x ➔ f = ${(-w * w * val).toFixed(2)} ms⁻²<br>Ek = ${(0.5 * state.mass * v * v).toFixed(1)} J | Ep = ${(0.5 * state.k * val * val).toFixed(1)} J`;
-        }
-
-        let curAns = 0;
-        function makeQuiz() {
-            const q = document.getElementById('aiQuestionText'), opts = document.getElementById('aiQuizOptions');
-            document.getElementById('aiQuizFeedback').classList.add('hidden');
-            const vmax = (state.omega * state.amplitude).toFixed(2);
-            curAns = vmax;
-            q.innerText = `විස්තාරය a = ${state.amplitude.toFixed(1)}m සහ ω = ${state.omega.toFixed(2)} rad/s විට උපරිම ප්‍රවේගය (Vmax) කොපමණද?`;
-            const arr = [vmax, (vmax * 1.5).toFixed(2), (vmax * 0.7).toFixed(2), (state.omega * 2).toFixed(2)].sort(() => Math.random() - 0.5);
-            opts.innerHTML = arr.map(o => `<button onclick="testAns('${o}')" class="p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-center font-bold active:scale-95">${o} ms⁻¹</button>`).join('');
-        }
-
-        window.testAns = function(ans) {
-            const f = document.getElementById('aiQuizFeedback'); f.classList.remove('hidden');
-            f.className = ans === curAns ? "mt-2 text-emerald-400 font-bold" : "mt-2 text-rose-400 font-bold";
-            f.innerText = ans === curAns ? `🎉 නිවැරදියි! (${curAns} ms⁻¹)` : `❌ වැරදියි. නිවැරදි අගය: ${curAns} ms⁻¹`;
-        };
-
-        // COMPARISON HUB
-        function saveRun() {
+        // 5-RUN COMPARISON HUB
+        function saveCurrentRun() {
             if (savedRuns.length >= 5) savedRuns.shift();
-            const names = ["", "1. තිරස්", "2. සිරස්", "3. ආනත", "4. දෙකෙළවර", "5. ලෝලකය"];
-            const tP = [], xP = [];
-            for (let i = 0; i <= 150; i++) {
-                const t = (i / 150) * 4.0; tP.push(t);
-                xP.push(state.amplitude * Math.cos(state.omega * t));
+
+            const runIdx = savedRuns.length;
+            const color = RUN_COLORS[runIdx % RUN_COLORS.length];
+            const modeNames = ["", "1. තිරස්", "2. සිරස්", "3. ආනත", "4. දෙකෙළවර", "5. ලෝලකය"];
+            const vmax = state.omega * state.amplitude;
+            const fmax = state.omega * state.omega * state.amplitude;
+
+            const timePoints = [];
+            const xPoints = [];
+            const duration = 4.0;
+            const steps = 200;
+            const dt = duration / steps;
+
+            let simX = state.amplitude;
+            let simV = 0;
+
+            for (let i = 0; i <= steps; i++) {
+                const t = i * dt;
+                timePoints.push(t);
+
+                if (state.mode === 2 && state.amplitude > state.eqExtension) {
+                    const ext = state.eqExtension + simX;
+                    const acc = ext >= 0 ? - (state.k / state.mass) * simX : state.g;
+                    simV += acc * dt;
+                    simX += simV * dt;
+                    xPoints.push(simX);
+                } else {
+                    xPoints.push(state.amplitude * Math.cos(state.omega * t));
+                }
             }
-            savedRuns.push({
-                runNumber: savedRuns.length + 1, color: RUN_COLORS[savedRuns.length % 5],
-                modeName: names[state.mode], a: state.amplitude, omega: state.omega, m: state.mass, k: state.k,
-                period: state.period, vmax: state.omega * state.amplitude, fmax: state.omega * state.omega * state.amplitude,
-                timePoints: tP, xPoints: xP
-            });
-            document.getElementById('badgeCompareCount').innerText = `${savedRuns.length}/5`;
-            renderHub();
+
+            const newRun = {
+                id: Date.now(),
+                runNumber: savedRuns.length + 1,
+                color: color,
+                mode: state.mode,
+                modeName: modeNames[state.mode],
+                a: state.amplitude,
+                omega: state.omega,
+                m: state.mass,
+                k: state.k,
+                period: state.period,
+                vmax: vmax,
+                fmax: fmax,
+                timePoints: timePoints,
+                xPoints: xPoints,
+                visible: true
+            };
+
+            savedRuns.push(newRun);
+            updateCompareBadge();
+            renderComparisonUI();
+
+            const btn = document.getElementById('btnSaveRun');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = `<span>✓ Run ${newRun.runNumber} සුරැකිණි!</span>`;
+            setTimeout(() => { btn.innerHTML = origHTML; }, 1200);
         }
 
-        const multiWaveCanvas = document.getElementById('multiWaveCanvas'), mCtx = multiWaveCanvas.getContext('2d');
-        function renderHub() {
-            const w = multiWaveCanvas.width = multiWaveCanvas.parentElement.clientWidth;
-            const h = multiWaveCanvas.height = multiWaveCanvas.parentElement.clientHeight;
-            if (w === 0) return;
-            mCtx.clearRect(0, 0, w, h);
-            mCtx.strokeStyle = 'rgba(0,242,254,0.3)'; mCtx.beginPath(); mCtx.moveTo(0, h / 2); mCtx.lineTo(w, h / 2); mCtx.stroke();
+        function updateCompareBadge() {
+            document.getElementById('badgeCompareCount').innerText = `${savedRuns.length}/5`;
+        }
 
-            savedRuns.forEach(r => {
-                mCtx.strokeStyle = r.color; mCtx.lineWidth = 2; mCtx.beginPath();
-                for (let i = 0; i < r.timePoints.length; i++) {
-                    const px = (r.timePoints[i] / 4.0) * w, py = h / 2 - (r.xPoints[i] / 6.0) * (h / 2 - 10);
-                    if (i === 0) mCtx.moveTo(px, py); else mCtx.lineTo(px, py);
+        const multiWaveCanvas = document.getElementById('multiWaveCanvas');
+        const mCtx = multiWaveCanvas.getContext('2d');
+
+        function resizeMultiWaveCanvas() {
+            const rect = multiWaveCanvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            multiWaveCanvas.width = rect.width;
+            multiWaveCanvas.height = rect.height;
+        }
+
+        function renderComparisonGraphs() {
+            const w = multiWaveCanvas.width;
+            const h = multiWaveCanvas.height;
+            if (w === 0 || h === 0) return;
+            mCtx.clearRect(0, 0, w, h);
+
+            const padL = 36;
+            const padR = 16;
+            const padT = 16;
+            const padB = 26;
+
+            const graphW = w - padL - padR;
+            const graphH = h - padT - padB;
+            const midY = padT + graphH / 2;
+
+            mCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            mCtx.lineWidth = 1;
+
+            for (let t = 0; t <= 4; t += 1.0) {
+                const gx = padL + (t / 4) * graphW;
+                mCtx.beginPath();
+                mCtx.moveTo(gx, padT);
+                mCtx.lineTo(gx, h - padB);
+                mCtx.stroke();
+
+                mCtx.fillStyle = '#64748b';
+                mCtx.font = '9px Orbitron';
+                mCtx.fillText(t.toFixed(0) + 's', gx - 6, h - padB + 14);
+            }
+
+            for (let yVal = -6; yVal <= 6; yVal += 3) {
+                const gy = midY - (yVal / 6) * (graphH / 2);
+                mCtx.beginPath();
+                mCtx.moveTo(padL, gy);
+                mCtx.lineTo(w - padR, gy);
+                mCtx.stroke();
+
+                mCtx.fillStyle = '#64748b';
+                mCtx.font = '9px Orbitron';
+                mCtx.fillText((yVal > 0 ? '+' : '') + yVal + 'm', 4, gy + 3);
+            }
+
+            mCtx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+            mCtx.lineWidth = 1.5;
+            mCtx.beginPath();
+            mCtx.moveTo(padL, midY);
+            mCtx.lineTo(w - padR, midY);
+            mCtx.stroke();
+
+            savedRuns.forEach(run => {
+                if (!run.visible) return;
+
+                mCtx.beginPath();
+                mCtx.strokeStyle = run.color;
+                mCtx.lineWidth = 2.2;
+
+                for (let i = 0; i < run.timePoints.length; i++) {
+                    const t = run.timePoints[i];
+                    const valX = run.xPoints[i];
+                    const px = padL + (t / 4) * graphW;
+                    const py = midY - (valX / 6) * (graphH / 2);
+
+                    if (i === 0) mCtx.moveTo(px, py);
+                    else mCtx.lineTo(px, py);
                 }
                 mCtx.stroke();
             });
+        }
 
-            const tbody = document.getElementById('compareTableBody'); tbody.innerHTML = '';
-            document.getElementById('noRunsMsg').classList.toggle('hidden', savedRuns.length > 0);
-            savedRuns.forEach((r, idx) => {
+        function renderComparisonTable() {
+            const tbody = document.getElementById('compareTableBody');
+            tbody.innerHTML = '';
+
+            const noRunsMsg = document.getElementById('noRunsMsg');
+            if (savedRuns.length === 0) {
+                noRunsMsg.classList.remove('hidden');
+                return;
+            } else {
+                noRunsMsg.classList.add('hidden');
+            }
+
+            savedRuns.forEach((run, index) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="py-1 px-2">R${r.runNumber}</td><td class="py-1"><span class="inline-block w-2.5 h-2.5 rounded-full" style="background:${r.color}"></span></td><td class="py-1 px-2 font-sinhala">${r.modeName}</td><td class="py-1 font-bold text-cyan-400">${r.a.toFixed(1)}</td><td class="py-1 text-cyan-300">${r.omega.toFixed(1)}</td><td class="py-1">${r.m.toFixed(1)}</td><td class="py-1">${r.k.toFixed(0)}</td><td class="py-1 font-bold text-amber-300">${r.period.toFixed(2)}s</td><td class="py-1">${r.vmax.toFixed(1)}</td><td class="py-1">${r.fmax.toFixed(1)}</td><td class="py-1 text-center"><button onclick="savedRuns.splice(${idx},1);renderHub();" class="text-rose-400">✕</button></td>`;
+                tr.className = "hover:bg-slate-900/60 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-1.5 px-2 font-bold">R${index + 1}</td>
+                    <td class="py-1.5 px-1">
+                        <span class="inline-block w-3 h-3 rounded-full shadow-md" style="background-color: ${run.color};"></span>
+                    </td>
+                    <td class="py-1.5 px-2 font-sinhala text-slate-200">${run.modeName}</td>
+                    <td class="py-1.5 px-1 text-cyan-400 font-bold">${run.a.toFixed(1)}</td>
+                    <td class="py-1.5 px-1 text-cyan-300">${run.omega.toFixed(1)}</td>
+                    <td class="py-1.5 px-1 text-emerald-400">${run.m.toFixed(1)}</td>
+                    <td class="py-1.5 px-1 text-amber-400">${run.k.toFixed(0)}</td>
+                    <td class="py-1.5 px-1 text-amber-300 font-bold">${run.period.toFixed(2)}s</td>
+                    <td class="py-1.5 px-1 text-emerald-300">${run.vmax.toFixed(1)}</td>
+                    <td class="py-1.5 px-1 text-rose-400">${run.fmax.toFixed(1)}</td>
+                    <td class="py-1.5 px-1 text-center">
+                        <button onclick="removeRun(${index})" class="text-rose-400 hover:text-white px-2 py-0.5 rounded bg-rose-950/40 hover:bg-rose-900 text-[10px] transition">
+                            ✕
+                        </button>
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
         }
 
-        function exportCSV() {
-            if (savedRuns.length === 0) return;
-            let csv = "Run,Mode,Amplitude_m,Omega,Mass_kg,K_Nm,Period_s,Vmax,Fmax\n";
-            savedRuns.forEach(r => { csv += `R${r.runNumber},"${r.modeName}",${r.a},${r.omega.toFixed(2)},${r.m},${r.k},${r.period.toFixed(2)},${r.vmax.toFixed(2)},${r.fmax.toFixed(2)}\n`; });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `SHM_Runs_${Date.now()}.csv`; a.click();
+        window.removeRun = function(index) {
+            savedRuns.splice(index, 1);
+            updateCompareBadge();
+            renderComparisonUI();
+        };
+
+        function renderComparisonUI() {
+            renderComparisonGraphs();
+            renderComparisonTable();
         }
 
-        // MOBILE DRAWER
-        let activeDrawer = null;
+        // MOBILE DRAWER AND FOCUS MODE LOGIC
+        let activeMobileDrawer = null;
+        let isFocusMode = false;
+
         function toggleMobileDrawer(type) {
-            const c = document.getElementById('controlsPanel'), a = document.getElementById('analyticsPanel'), b = document.getElementById('mobileBackdrop');
-            if (activeDrawer === type) { closeActiveDrawer(); return; }
-            c.classList.remove('drawer-open'); a.classList.remove('drawer-open');
-            if (type === 'controls') { c.classList.add('drawer-open'); activeDrawer = 'controls'; }
-            else { a.classList.add('drawer-open'); activeDrawer = 'analytics'; setTimeout(resizeCanvases, 150); }
-            b.classList.remove('hidden'); setTimeout(() => b.classList.remove('opacity-0'), 10);
+            const controlsPanel = document.getElementById('controlsPanel');
+            const analyticsPanel = document.getElementById('analyticsPanel');
+            const backdrop = document.getElementById('mobileBackdrop');
+
+            if (activeMobileDrawer === type) {
+                closeActiveDrawer();
+                return;
+            }
+
+            controlsPanel.classList.remove('drawer-open');
+            analyticsPanel.classList.remove('drawer-open');
+
+            if (type === 'controls') {
+                controlsPanel.classList.add('drawer-open');
+                activeMobileDrawer = 'controls';
+            } else if (type === 'analytics') {
+                analyticsPanel.classList.add('drawer-open');
+                activeMobileDrawer = 'analytics';
+                setTimeout(() => {
+                    resizeCircleCanvas();
+                    resizeEnergyCanvas();
+                }, 150);
+            }
+
+            backdrop.classList.remove('hidden');
+            setTimeout(() => { backdrop.classList.remove('opacity-0'); }, 10);
         }
 
         function closeActiveDrawer() {
-            document.getElementById('controlsPanel').classList.remove('drawer-open');
-            document.getElementById('analyticsPanel').classList.remove('drawer-open');
-            activeDrawer = null;
-            const b = document.getElementById('mobileBackdrop');
-            b.classList.add('opacity-0'); setTimeout(() => b.classList.add('hidden'), 300);
+            const controlsPanel = document.getElementById('controlsPanel');
+            const analyticsPanel = document.getElementById('analyticsPanel');
+            const backdrop = document.getElementById('mobileBackdrop');
+
+            controlsPanel.classList.remove('drawer-open');
+            analyticsPanel.classList.remove('drawer-open');
+            activeMobileDrawer = null;
+
+            backdrop.classList.add('opacity-0');
+            setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
         }
 
-        function setupDrawerSwipe() {
-            [document.getElementById('controlsPanel'), document.getElementById('analyticsPanel')].forEach(d => {
-                let sy = 0, cy = 0;
-                d.addEventListener('touchstart', e => { sy = e.touches[0].clientY; }, { passive: true });
-                d.addEventListener('touchmove', e => { cy = e.touches[0].clientY; const diff = cy - sy; if (diff > 0) d.style.transform = `translateY(${diff}px)`; }, { passive: true });
-                d.addEventListener('touchend', () => { d.style.transform = ''; if (cy - sy > 80) closeActiveDrawer(); });
+        function toggleFocusMode() {
+            isFocusMode = !isFocusMode;
+            const headerContainer = document.getElementById('headerContainer');
+            const controlsPanel = document.getElementById('controlsPanel');
+            const analyticsPanel = document.getElementById('analyticsPanel');
+            const focusIcon = document.getElementById('focusIcon');
+            const focusLabel = document.getElementById('focusLabel');
+
+            closeActiveDrawer();
+
+            if (isFocusMode) {
+                headerContainer.classList.add('header-hidden');
+                controlsPanel.classList.add('mobile-hide');
+                analyticsPanel.classList.add('mobile-hide');
+                focusIcon.innerText = "✨";
+                focusLabel.innerText = "දර්ශනය";
+            } else {
+                headerContainer.classList.remove('header-hidden');
+                controlsPanel.classList.remove('mobile-hide');
+                analyticsPanel.classList.remove('mobile-hide');
+                focusIcon.innerText = "👁️";
+                focusLabel.innerText = "දසුන";
+            }
+        }
+
+        // AUTO-HIDING TOP HEADER ENGINE
+        function setupAutoHidingHeader() {
+            const headerContainer = document.getElementById('headerContainer');
+            const pullTab = document.getElementById('headerPullTab');
+            const pullTabIcon = document.getElementById('pullTabIcon');
+            const btnPin = document.getElementById('btnPinHeader');
+            const btnPinMobile = document.getElementById('btnPinHeaderMobile');
+            const pinLabel = document.getElementById('pinLabel');
+
+            let isPinned = false;
+            let isHidden = false;
+            let hideTimeout = null;
+
+            function showHeader() {
+                if (hideTimeout) clearTimeout(hideTimeout);
+                headerContainer.classList.remove('header-hidden');
+                isHidden = false;
+                pullTabIcon.style.transform = 'rotate(180deg)';
+                if (!isPinned) {
+                    hideTimeout = setTimeout(hideHeader, 3500);
+                }
+            }
+
+            function hideHeader() {
+                if (isPinned) return;
+                headerContainer.classList.add('header-hidden');
+                isHidden = true;
+                pullTabIcon.style.transform = 'rotate(0deg)';
+            }
+
+            window.addEventListener('mousemove', (e) => {
+                if (isPinned) return;
+                if (e.clientY <= 65) {
+                    showHeader();
+                } else if (!headerContainer.contains(e.target)) {
+                    if (!isHidden && !hideTimeout) {
+                        hideTimeout = setTimeout(hideHeader, 3500);
+                    }
+                }
             });
-        }
 
-        // HEADER
-        function setupHeader() {
-            const h = document.getElementById('headerContainer'), tab = document.getElementById('headerPullTab'), btn = document.getElementById('btnPinHeader');
-            let pinned = false, hidden = false, timer = null;
-            function show() { if (timer) clearTimeout(timer); h.classList.remove('header-hidden'); hidden = false; if (!pinned) timer = setTimeout(hide, 3500); }
-            function hide() { if (pinned) return; h.classList.add('header-hidden'); hidden = true; }
-            window.addEventListener('mousemove', e => { if (!pinned && e.clientY <= 65) show(); });
-            tab.addEventListener('click', () => { if (hidden) show(); else hide(); });
-            btn.addEventListener('click', () => {
-                pinned = !pinned;
-                btn.className = pinned ? "px-2 py-1.5 rounded-xl bg-cyan-500 text-spaceDark font-bold text-xs" : "px-2 py-1.5 rounded-xl bg-slate-800/90 text-slate-300 text-xs";
+            headerContainer.addEventListener('mouseenter', () => {
+                if (hideTimeout) clearTimeout(hideTimeout);
             });
-            timer = setTimeout(hide, 4000);
+
+            headerContainer.addEventListener('mouseleave', () => {
+                if (!isPinned) {
+                    if (hideTimeout) clearTimeout(hideTimeout);
+                    hideTimeout = setTimeout(hideHeader, 2500);
+                }
+            });
+
+            pullTab.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isHidden) showHeader();
+                else hideHeader();
+            });
+
+            function togglePin() {
+                isPinned = !isPinned;
+                if (isPinned) {
+                    if (hideTimeout) clearTimeout(hideTimeout);
+                    headerContainer.classList.remove('header-hidden');
+                    isHidden = false;
+                    if (btnPin) {
+                        btnPin.className = "flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-cyan-500 text-spaceDark border border-cyan-400 text-xs font-bold transition shadow-md shadow-cyan-500/30";
+                        pinLabel.innerText = "Pinned";
+                    }
+                    if (btnPinMobile) btnPinMobile.classList.add('bg-cyan-500', 'text-spaceDark');
+                } else {
+                    if (btnPin) {
+                        btnPin.className = "flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-cyan-500 hover:text-spaceDark border border-slate-700 text-xs font-semibold text-slate-300 transition shadow-md";
+                        pinLabel.innerText = "Pin";
+                    }
+                    if (btnPinMobile) btnPinMobile.classList.remove('bg-cyan-500', 'text-spaceDark');
+                    hideTimeout = setTimeout(hideHeader, 3500);
+                }
+            }
+
+            if (btnPin) btnPin.addEventListener('click', togglePin);
+            if (btnPinMobile) btnPinMobile.addEventListener('click', togglePin);
+
+            hideTimeout = setTimeout(hideHeader, 4000);
         }
 
-        // EVENTS
-        function setupEvents() {
-            document.querySelectorAll('.mode-btn').forEach(btn => {
+        // ANIMATION LOOP
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = Math.min(clock.getDelta(), 0.05);
+
+            if (state.isRunning) {
+                updatePhysics(dt);
+                renderSim3D();
+                renderHUD();
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // EVENT LISTENERS SETUP
+        function setupEventListeners() {
+            const modeBtns = document.querySelectorAll('.mode-btn');
+            modeBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    document.querySelectorAll('.mode-btn').forEach(b => b.className = "mode-btn px-2 py-1 rounded-lg text-xs font-semibold text-slate-300 whitespace-nowrap");
-                    btn.className = "mode-btn px-2 py-1 rounded-lg text-xs font-bold bg-cyber text-spaceDark whitespace-nowrap";
-                    setMode(btn.dataset.mode);
+                    modeBtns.forEach(b => {
+                        b.className = "mode-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800/80 whitespace-nowrap";
+                    });
+                    btn.className = "mode-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-cyber text-spaceDark shadow-md shadow-cyan-500/30 whitespace-nowrap";
+                    setMode(btn.getAttribute('data-mode'));
                 });
             });
 
-            document.getElementById('btnPlay').addEventListener('click', () => {
-                initAudio(); state.isRunning = !state.isRunning;
+            const btnPlay = document.getElementById('btnPlay');
+            btnPlay.addEventListener('click', () => {
+                state.isRunning = !state.isRunning;
                 document.getElementById('playLabel').innerText = state.isRunning ? "නවතන්න" : "ධාවනය";
+                document.getElementById('playIcon').innerText = state.isRunning ? "⏸️" : "▶️";
             });
 
-            document.getElementById('btnStep').addEventListener('click', () => { initAudio(); state.isRunning = false; updatePhysics(0.05); render3D(); renderHUD(); });
-            document.getElementById('btnReset').addEventListener('click', () => { state.time = 0; state.x = state.amplitude; state.v = 0; state.f = 0; render3D(); renderHUD(); });
-            document.getElementById('btnResetView').addEventListener('click', () => { camera.position.set(0, 4.0, 24); controls.target.set(0, 0, 0); });
+            document.getElementById('btnStep').addEventListener('click', () => {
+                state.isRunning = false;
+                document.getElementById('playLabel').innerText = "ධාවනය";
+                document.getElementById('playIcon').innerText = "▶️";
+                updatePhysics(0.05);
+                renderSim3D();
+                renderHUD();
+            });
 
-            document.getElementById('btnSaveRun').addEventListener('click', saveRun);
-            document.getElementById('btnOpenCompare').addEventListener('click', () => { document.getElementById('compareModal').classList.remove('hidden'); renderHub(); });
-            document.getElementById('btnCloseCompare').addEventListener('click', () => document.getElementById('compareModal').classList.add('hidden'));
-            document.getElementById('btnClearRuns').addEventListener('click', () => { savedRuns.length = 0; document.getElementById('badgeCompareCount').innerText = "0/5"; renderHub(); });
-            document.getElementById('btnExportCSV').addEventListener('click', exportCSV);
+            document.getElementById('btnReset').addEventListener('click', () => {
+                state.time = 0;
+                state.x = state.amplitude;
+                state.v = 0;
+                state.f = 0;
+                renderSim3D();
+                renderHUD();
+            });
 
-            document.getElementById('btnTheory').addEventListener('click', () => document.getElementById('theoryModal').classList.remove('hidden'));
-            document.getElementById('btnTheoryMobile').addEventListener('click', () => document.getElementById('theoryModal').classList.remove('hidden'));
-            document.getElementById('btnCloseTheory').addEventListener('click', () => document.getElementById('theoryModal').classList.add('hidden'));
+            document.getElementById('btnResetView').addEventListener('click', () => {
+                camera.position.set(0, 4.0, 24);
+                controls.target.set(0, 0, 0);
+                controls.update();
+            });
 
-            const aiModal = document.getElementById('aiCopilotModal');
-            document.getElementById('btnOpenAiCopilot').addEventListener('click', () => { updateAiCopilot(); makeQuiz(); solveStep(); aiModal.classList.remove('hidden'); });
-            document.getElementById('btnAiCopilotMobile').addEventListener('click', () => { updateAiCopilot(); makeQuiz(); solveStep(); aiModal.classList.remove('hidden'); });
-            document.getElementById('btnCloseAiCopilot').addEventListener('click', () => aiModal.classList.add('hidden'));
-            document.getElementById('btnAiSolve').addEventListener('click', solveStep);
-            document.getElementById('btnAiNewQuestion').addEventListener('click', makeQuiz);
+            const speedBtns = document.querySelectorAll('#speedGroup button');
+            speedBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    speedBtns.forEach(b => b.className = "px-2 py-0.5 rounded text-slate-400 hover:text-white");
+                    btn.className = "px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-bold";
+                    state.speedMultiplier = parseFloat(btn.getAttribute('data-speed'));
+                });
+            });
+
+            document.getElementById('btnSaveRun').addEventListener('click', saveCurrentRun);
+
+            const compareModal = document.getElementById('compareModal');
+            document.getElementById('btnOpenCompare').addEventListener('click', () => {
+                compareModal.classList.remove('hidden');
+                resizeMultiWaveCanvas();
+                renderComparisonUI();
+            });
+            document.getElementById('btnCloseCompare').addEventListener('click', () => compareModal.classList.add('hidden'));
+            document.getElementById('btnClearRuns').addEventListener('click', () => {
+                savedRuns.length = 0;
+                updateCompareBadge();
+                renderComparisonUI();
+            });
+
+            const theoryModal = document.getElementById('theoryModal');
+            document.getElementById('btnTheory').addEventListener('click', () => theoryModal.classList.remove('hidden'));
+            document.getElementById('btnTheoryMobile').addEventListener('click', () => theoryModal.classList.remove('hidden'));
+            document.getElementById('btnCloseTheory').addEventListener('click', () => theoryModal.classList.add('hidden'));
 
             document.getElementById('mobileBackdrop').addEventListener('click', closeActiveDrawer);
 
-            document.getElementById('sliderAmp').addEventListener('input', e => { state.amplitude = parseFloat(e.target.value); document.getElementById('labelAmp').innerText = state.amplitude.toFixed(1) + " m"; state.x = state.amplitude; state.v = 0; recalcParams(); updateAiCopilot(); });
-            document.getElementById('sliderMass').addEventListener('input', e => { state.mass = parseFloat(e.target.value); document.getElementById('labelMass').innerText = state.mass.toFixed(1) + " kg"; recalcParams(); updateAiCopilot(); });
-            document.getElementById('sliderK').addEventListener('input', e => { state.k = parseFloat(e.target.value); document.getElementById('labelK').innerText = state.k.toFixed(1) + " N/m"; recalcParams(); updateAiCopilot(); });
-            document.getElementById('sliderAngle').addEventListener('input', e => { const d = parseFloat(e.target.value); state.inclineAngle = d * (Math.PI / 180); document.getElementById('labelAngle').innerText = d + "°"; setMode(3); });
-            document.getElementById('sliderL').addEventListener('input', e => { state.pendulumLength = parseFloat(e.target.value); document.getElementById('labelL').innerText = state.pendulumLength.toFixed(1) + " m"; recalcParams(); updateAiCopilot(); });
+            document.getElementById('sliderAmp').addEventListener('input', (e) => {
+                state.amplitude = parseFloat(e.target.value);
+                document.getElementById('labelAmp').innerText = state.amplitude.toFixed(1) + " m";
+                state.x = state.amplitude;
+                state.v = 0;
+                recalcParams();
+            });
 
-            document.getElementById('chkVel').addEventListener('change', e => arrowVel.visible = e.target.checked);
-            document.getElementById('chkAcc').addEventListener('change', e => arrowAcc.visible = e.target.checked);
-            document.getElementById('chkHaptic').addEventListener('change', e => state.hapticEnabled = e.target.checked);
-            document.getElementById('chkTrail').addEventListener('change', e => state.trailEnabled = e.target.checked);
-            document.getElementById('chkSound').addEventListener('change', e => {
-                state.soundEnabled = e.target.checked;
-                if (!state.soundEnabled && gainNode && audioCtx) gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            document.getElementById('sliderMass').addEventListener('input', (e) => {
+                state.mass = parseFloat(e.target.value);
+                document.getElementById('labelMass').innerText = state.mass.toFixed(1) + " kg";
+                recalcParams();
+            });
+
+            document.getElementById('sliderK').addEventListener('input', (e) => {
+                state.k = parseFloat(e.target.value);
+                document.getElementById('labelK').innerText = state.k.toFixed(1) + " N/m";
+                recalcParams();
+            });
+
+            document.getElementById('sliderAngle').addEventListener('input', (e) => {
+                const deg = parseFloat(e.target.value);
+                state.inclineAngle = deg * (Math.PI / 180);
+                document.getElementById('labelAngle').innerText = deg + "°";
+                setMode(3);
+            });
+
+            document.getElementById('sliderL').addEventListener('input', (e) => {
+                state.pendulumLength = parseFloat(e.target.value);
+                document.getElementById('labelL').innerText = state.pendulumLength.toFixed(1) + " m";
+                recalcParams();
+            });
+
+            document.getElementById('chkVel').addEventListener('change', (e) => { arrowVel.visible = e.target.checked; });
+            document.getElementById('chkAcc').addEventListener('change', (e) => { arrowAcc.visible = e.target.checked; });
+            document.getElementById('chkHaptic').addEventListener('change', (e) => { state.hapticEnabled = e.target.checked; });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    btnPlay.click();
+                }
             });
 
             window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                resizeCanvases();
-                if (!document.getElementById('compareModal').classList.contains('hidden')) renderHub();
-                if (window.innerWidth > 850) closeActiveDrawer();
+                resizeCircleCanvas();
+                resizeEnergyCanvas();
+                resizeMultiWaveCanvas();
+                if (!compareModal.classList.contains('hidden')) renderComparisonGraphs();
+
+                if (window.innerWidth > 850) {
+                    closeActiveDrawer();
+                    document.getElementById('controlsPanel').classList.remove('mobile-hide');
+                    document.getElementById('analyticsPanel').classList.remove('mobile-hide');
+                }
             });
         }
 
-        // INITIALIZE
+        // INITIALIZE ON LOAD
         window.addEventListener('load', () => {
-            resizeCanvases();
-            setupEvents();
-            setupHeader();
-            setupDrawerSwipe();
+            resizeCircleCanvas();
+            resizeEnergyCanvas();
+            resizeMultiWaveCanvas();
+            setupEventListeners();
+            setupAutoHidingHeader();
+            setupDrawerGestures();
             setMode(1);
-            const clock = new THREE.Clock();
-            function loop() {
-                requestAnimationFrame(loop);
-                const dt = Math.min(clock.getDelta(), 0.05);
-                if (state.isRunning) { updatePhysics(dt); render3D(); renderHUD(); }
-                controls.update(); renderer.render(scene, camera);
-            }
-            loop();
+            animate();
         });
     </script>
 </body>
